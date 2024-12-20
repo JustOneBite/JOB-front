@@ -8,6 +8,7 @@ export default function Writing(){
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [submitCount, setSubmitCount] = useState(0)
+    const [grammerResult, setGrammerResult] =  useState(null)
 
     const btnTitleArr = ['1차 문법 검사', '2차 선생님 검사', '최종 제출']
     const [btnTitle, setBtnTitle] = useState(btnTitleArr[0])
@@ -57,9 +58,19 @@ export default function Writing(){
             }
         };
 
-        const handleSubmit = (e) => {
+        const handleSubmit = async (e) => {
             e.preventDefault();  // 페이지 리로딩 방지
             // 추가적으로 제출할 때 실행할 로직을 여기에 작성
+
+            const res = await fetch('http://localhost:8080/mainStudy/writing', {
+                method : "POST",
+                headers : {'Content-Type' : 'application/json'},
+                body: JSON.stringify({writing})
+            })
+
+            const grammerData = res.json()
+            setGrammerResult(grammerData)
+            
         };
 
         const handleClick = () => {
@@ -82,6 +93,17 @@ export default function Writing(){
                 <p>{writingInfo.wordLimit - countWords(writing)} 단어 남음</p>  {/* 남은 단어 수 표시 */}
                 <button type="submit" onClick = {handleClick} disabled={countWords(writing) === 0 || submitCount === writingInfo.submitCount + 1}>{btnTitle}</button>
             </form>
+            {result && (
+                <div>
+                    <h2>Grammar Issues:</h2>
+                    {result.matches && result.matches.map((match, index) => (
+                        <div key={index}>
+                            <p>{match.message}</p>
+                            <p>Issue: {match.context.text}</p>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     )
 }
