@@ -83,8 +83,11 @@ export default function Writing() {
                 throw new Error('Network response was not ok');
             }
 
-            const result = await response.json();
-            alert('저장 성공이다제!')
+            let result = await response.json();
+            console.log('저장 성공이다제!')
+            // console.log("result : ", result)
+            // console.log("result : ", result.data)
+            result = result.data
 
             setWritingInfo({ title: result.theme, wordLimit: result.wordLimit, submitCount: result.submitCnt }); // 응답에서 받은 writingInfo 저장장
 
@@ -96,7 +99,7 @@ export default function Writing() {
     const grammerCheck = async () => {
         try {
             
-            const grammarResponse = await fetch("http://localhost:8080/mainStudy/grammerCheck", {
+            const grammarResponse = await fetch("http://localhost:8080/mainStudy/grammerCheckWritingData", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -121,10 +124,9 @@ export default function Writing() {
     }
 
     const handleSubmit = async (e) => {
-        e.preventDefault(); // 기본 동작 방지
-        await grammerCheck(); // 문법 검사 수행
-        await handleClick(); // 저장 기능 수행
-
+        e.preventDefault();
+        await grammerCheck();
+        await handleClick();
     };
 
     return (
