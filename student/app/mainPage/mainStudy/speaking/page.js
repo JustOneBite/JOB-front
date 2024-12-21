@@ -58,7 +58,7 @@ export default function Speaking() {
     recognitionRef.current.start();
   };
 
-  // 이 함수는 컴포넌트가 언마운트될 때 실행됩니다
+  // 페이지 전환을 하거나 컴포넌트가 언마운트 되면 음성인식, 미디어 녹음을 중지
   useEffect(() => {
     return () => {
       // 음성 인식(Recognition)이 활성화되어 있으면 중지
@@ -70,19 +70,21 @@ export default function Speaking() {
         mediaRecorderRef.current.stop();
       }
     };
-  }, []); // 빈 배열을 전달하여, 컴포넌트가 마운트될 때 한 번만 실행되고, 언마운트 시 실행되도록 함
+  }, []);  // 빈 배열을 전달하여, 컴포넌트가 마운트될 때 한 번만 실행되고, 언마운트 시 실행되도록 함
 
   // 녹음 정지 함수
   const stopRecording = () => {
+    // 음성 인식이 켜져있으면 중지
     if (recognitionRef.current) {
       recognitionRef.current.stop();
     }
+    // 음성녹음이 켜져있으면 중지
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
     }
   };
 
-  // 녹음 상태(시작/정지)를 전환하고 녹음 시작을 실행해주는 함수
+  // 녹음을 시작/중지 해주는 함수
   const handleToggleRecording = () => {
     if (!isRecording) {
       startRecording();
