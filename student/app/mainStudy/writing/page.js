@@ -56,20 +56,12 @@ export default function Writing(){
     if (error) return <div>Error: {error}</div>; // 오류 발생 시
 
     const countWords = (text) => {
-        if(!text)
-            return 0;
-        // 텍스트에서 공백을 기준으로 단어를 분리한 후, 빈 문자열을 제외한 단어 수를 계산
-        return text.trim().split(/\s+/).filter(word => word.length > 0).length;
-    };
+        return text.length;
+      };
 
     const handleChange = (e) => {
         const inputText = e.target.value;
-        const wordCount = countWords(inputText);
-
-        // 단어 수가 제한을 넘지 않도록 제한
-        if (wordCount <= writingInfo.wordLimit) {
-            setWriting(inputText); // 단어 수가 제한 내에 있으면 입력값을 업데이트
-        }
+        setWriting(inputText);
     };
 
         // const handleSubmit = async (e) => {
@@ -123,10 +115,11 @@ export default function Writing(){
                     name="content"
                     value={writing}
                     onChange={handleChange}
+                    maxLength={writingInfo.wordLimit}
                     placeholder="글을 작성하세요"
                 />
-                <p>{writingInfo.wordLimit - countWords(writing)} 단어 남음</p>  {/* 남은 단어 수 표시 */}
-                <button type="submit" onClick = {handleClick} disabled={countWords(writing) === 0 || submitCount === writingInfo.submitCount + 1}>{btnTitle}</button>
+                <p>남은 글자수 {writingInfo.wordLimit - countWords(writing)}</p>
+                <button type="submit" onClick = {handleClick} disabled= {countWords(writing) === 0}>{btnTitle}</button>
             </form>
             {/* {result && (
                 <div>
