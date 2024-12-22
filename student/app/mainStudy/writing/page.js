@@ -98,7 +98,7 @@ export default function Writing() {
 
     const grammerCheck = async () => {
         try {
-            
+
             const grammarResponse = await fetch("http://localhost:8080/mainStudy/grammerCheckWritingData", {
                 method: "POST",
                 headers: {
@@ -114,10 +114,10 @@ export default function Writing() {
                 throw new Error("Failed to check grammar.");
             }
 
-            const grammarResult = await grammarResponse.json();
+            const checkedGrammarResult = await grammarResponse.json();
 
             // 문법 검사 결과 업데이트
-            setGrammerResult(grammarResult.grammarIssues);
+            setGrammerResult(checkedGrammarResult.grammarIssues);
         } catch (err) {
             setError(err.message)
         }
@@ -128,6 +128,41 @@ export default function Writing() {
         await grammerCheck();
         await handleClick();
     };
+
+    const highlightText = (text, issues) => {
+        if (issues === null || issues.length === 0) {
+            return text; // 문법 오류가 없으면 원본 텍스트 반환
+        }
+    
+        let highlightedParts = [];
+        let lastIndex = 0; // 마지막 인덱스 추적
+    
+        // 문법 검사 결과를 순회하여 해당 단어에 스타일을 적용
+        issues.forEach((issue, index) => {
+            const regex = new RegExp(`(${issue.context.text})`, "g"); // 일치하는 텍스트 찾기
+            const matchIndex = text.indexOf(issue.context.text, lastIndex); // 현재 인덱스에서 찾기
+    
+            // 현재 오류가 발견된 인덱스까지의 텍스트를 추가
+            if (matchIndex > -1) {
+                highlightedParts.push(text.slice(lastIndex, matchIndex)); // 이전 텍스트 추가
+                highlightedParts.push(<span key={`number-${index}`} style={{ color: "blue" }}> [{index + 1}] </span>); // 오류 번호 추가
+                highlightedParts.push(
+                    <span key={`error-${index}`} style={{ textDecoration: "underline", color: "red" }}>
+                        {issue.context.text}
+                    </span>
+                );
+                lastIndex = matchIndex + issue.context.text.length; // 마지막 인덱스 업데이트
+            }
+        });
+    
+        // 마지막 부분 추가
+        highlightedParts.push(text.slice(lastIndex));
+    
+        return <>{highlightedParts}</>; // 모든 부분을 React 요소로 반환
+    };
+    
+    
+
 
     return (
         <div className="p-20">
@@ -154,6 +189,11 @@ export default function Writing() {
                     ))}
                 </div>
             )}
+            <div
+                style={{ border: '1px solid #ccc', padding: '10px', minHeight: '100px' }}
+            >
+                {highlightText(writing, grammerResult)}
+            </div>
         </div>
     )
 }
