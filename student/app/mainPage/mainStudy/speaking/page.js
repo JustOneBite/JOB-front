@@ -94,11 +94,81 @@ export default function Speaking() {
     }
   };
 
+  const micButtonStyle = isRecording ? styles.micButtonRecording : styles.micButtonIdle;
+
   // 녹음 상태에 따라 적절한 UI를 렌더링하는 부분
+  // return (
+  //   <div className={styles.container}>
+  //     <div>
+  //       {/* 현재 녹음 상태를 보여줌 */}
+  //       {(isRecording || transcript) && (
+  //         <div>
+  //           <div className={styles.status}>
+  //             <p>{!isRecording ? "녹음 완료" : "녹음 중"}</p>
+  //             <p>
+  //               {!isRecording ? "말해 주셔서 감사합니다." : "말씀을 시작하세요..."}
+  //             </p>
+  //           </div>
+            
+  //           {/* 녹음된 음원의 텍스트 버전을 보여줌 */}
+  //           {transcript && (
+  //             <div className={styles.transcript}>
+  //               <p>{transcript}</p>
+  //             </div>
+  //           )}
+  //         </div>
+  //       )}
+
+  //       {/* 녹음 시작 정지 버튼 */}
+  //       <div>
+  //         {isRecording ? (
+  //           <button onClick={handleToggleRecording} className={styles.btn}>중지</button>
+  //         ) : (
+  //           <button onClick={handleToggleRecording} className={styles.btn}>시작</button>
+  //         )}
+  //       </div>
+
+  //       {/* 최신 오디오 파일을 렌더링하며, 가장 최근 녹음만 표시하도록 함 */}
+  //       {audioURL && (
+  //         <div className={styles.audioContainer}>
+  //           <p>녹음된 오디오:</p>
+  //           <audio key={audioURL} controls>
+  //             <source src={audioURL} type="audio/wav" />
+  //             브라우저에서 오디오 요소를 지원하지 않습니다.
+  //           </audio>
+  //         </div>
+  //       )}
+  //     </div>
+  //   </div>
+  // );
   return (
     <div className={styles.container}>
-      <div>
+
+      {/* 상단 헤더 */}
+      <header className={styles.header}>
+        <div className={styles.titleContainer}>
+          <p className={styles.title}>Speaking</p>
+          <p className={styles.lesson}>Lesson 3</p>
+        </div>
+        <div className={styles.progressContainer}>
+          <div className={styles.progressBar}></div>
+        </div>
+        <div className={styles.progressInfo}>
+          <p>10 / 30</p>
+        </div>
+      </header>
+
+      {/* 메인 컨텐츠 */}
+      <main className={styles.main}>
+        {/* Google Font 아이콘 불러오기 */}
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+        <p className={styles.instruction}>다음 문장을 발음해보세요</p>
+        <div className={styles.sentenceBox}>
+          <p className={styles.sentence}>Happy solo Christmas and a solo new year</p>
+        </div>
         {/* 현재 녹음 상태를 보여줌 */}
+        
         {(isRecording || transcript) && (
           <div>
             <div className={styles.status}>
@@ -117,26 +187,43 @@ export default function Speaking() {
           </div>
         )}
 
-        {/* 녹음 시작 정지 버튼 */}
-        <div>
-          {isRecording ? (
-            <button onClick={handleToggleRecording} className={styles.btn}>중지</button>
-          ) : (
-            <button onClick={handleToggleRecording} className={styles.btn}>시작</button>
-          )}
-        </div>
+        {/* 수평 컨트롤 영역 */}
+        <div className={styles.horizontalControls}>
+          {/* 마이크 버튼 */}
+          <div>
+            {isRecording ? (
+              <button onClick={handleToggleRecording} className={micButtonStyle}><span className="material-icons">mic</span></button>
+            ) : (
+              <button onClick={handleToggleRecording} className={micButtonStyle}><span className="material-icons">mic</span></button>
+            )}
+          </div>
 
-        {/* 최신 오디오 파일을 렌더링하며, 가장 최근 녹음만 표시하도록 함 */}
-        {audioURL && (
+          {/* 진행 점 */}
+          <div className={styles.dots}>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+
+          {/* 오디오 재생 버튼 */}
+          {/* 최신 오디오 파일을 렌더링하며, 가장 최근 녹음만 표시하도록 함. 녹음된 오디오 다운로드 기능 삭제*/}
           <div className={styles.audioContainer}>
-            <p>녹음된 오디오:</p>
-            <audio key={audioURL} controls>
-              <source src={audioURL} type="audio/wav" />
+            <audio className={styles.audioPlayer} key={audioURL} controlsList="nodownload" controls>
+              {audioURL ? (
+                <source src={audioURL} type="audio/wav" />
+              ) : (
+                <track kind="descriptions" label="No audio available" />
+              )}
               브라우저에서 오디오 요소를 지원하지 않습니다.
             </audio>
           </div>
-        )}
-      </div>
+        </div>
+      </main>
+
+      {/* 하단 확인 버튼 */}
+      <footer className={styles.footer}>
+        <button className={styles.confirmButton}>확인</button>
+      </footer>
     </div>
   );
 }
