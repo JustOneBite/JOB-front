@@ -4,13 +4,13 @@ import { useEffect, useState } from "react"
 export default function Writing() {
 
     const [writing, setWriting] = useState('')
-    const [writingInfo, setWritingInfo] = useState({ title: '', wordLimit: 0 })
+    const [writingInfo, setWritingInfo] = useState({ title: '', wordLimit: 0, studentContent : '' })
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [submitCount, setSubmitCount] = useState(0)
     const [grammerResult, setGrammerResult] = useState(null)
 
-    const btnTitleArr = ['1차 문법 검사', '2차 선생님 검사', '최종 제출']
+    const btnTitleArr = ['1차 문법 검사', '2차 문법 검사', '선생님 검사', '최종 제출']
     const [btnTitle, setBtnTitle] = useState(btnTitleArr[0])
 
     useEffect(() => {
@@ -33,7 +33,7 @@ export default function Writing() {
                 const result1 = await response.json();
                 const result = result1.writingData
 
-                setWritingInfo({ title: result.theme, wordLimit: result.wordLimit }); // 응답에서 받은 writingInfo 저장장
+                setWritingInfo({ title: result.theme, wordLimit: result.wordLimit, studentContent: result.studentContent }); // 응답에서 받은 writingInfo 저장
                 setWriting(result.studentContent)
                 setSubmitCount(result.submitCnt)
             } catch (err) {
@@ -85,11 +85,14 @@ export default function Writing() {
 
             let result = await response.json();
             console.log('저장 성공이다제!')
+
             // console.log("result : ", result)
             // console.log("result : ", result.data)
+
             result = result.data
 
-            setWritingInfo({ title: result.theme, wordLimit: result.wordLimit, submitCount: result.submitCnt }); // 응답에서 받은 writingInfo 저장장
+            setWritingInfo({ title: result.theme, wordLimit: result.wordLimit, studentContent: result.studentContent }); // 응답에서 받은 writingInfo 저장
+            setSubmitCount(result.submitCnt) 
 
         } catch (err) {
             setError(err.message); // 오류 발생 시 상태에 오류 메시지 저장
@@ -124,14 +127,19 @@ export default function Writing() {
     }
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        await grammerCheck();
-        await handleClick();
+        if(submitCount !== 2){  // 화면에 chatgpt 문법 수정 사라지게 하려면 한번은 새로고침해야 됨.
+            e.preventDefault();
+        }
+
+        if(submitCount < 2){ // 2번 이상 문법 체크 시 막아버림
+            await grammerCheck()
+        }
+        await handleClick()
     };
 
     const highlightText = (text, issues) => {
         if (issues === null || issues.length === 0) {
-            return text; // 문법 오류가 없으면 원본 텍스트 반환
+            return text // 문법 오류가 없으면 원본 텍스트 반환
         }
     
         let highlightedParts = [];
@@ -192,7 +200,7 @@ export default function Writing() {
             <div
                 style={{ border: '1px solid #ccc', padding: '10px', minHeight: '100px' }}
             >
-                {highlightText(writing, grammerResult)}
+                {highlightText(writingInfo.studentContent, grammerResult)}
             </div>
         </div>
     )
