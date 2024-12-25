@@ -55,8 +55,9 @@ export default function listening() {
     const renderTextWithUnderline = (wordArr, offset) => {
         
         return wordArr.map((word, index) => {
+
             if (word === wordArr[offset[0] - 1]) {
-                // offset에서 주어진 단어어인 경우 빨간 밑줄과 텍스트 입력 필드를 제공
+                // offset에서 주어진 단어인 경우 빨간 밑줄과 텍스트 입력 필드를 제공
                 return (
                     <span key={index} style={{ borderBottom: '2px solid red', display: 'inline-block' }}>
                         <input
@@ -69,6 +70,7 @@ export default function listening() {
                         />
                     </span>
                 )
+
             } else {
                 // 그 이외 단어들은 검은색 밑줄로 표시시
                 return (
@@ -117,7 +119,7 @@ export default function listening() {
                 <div style={{ marginTop: '20px' }}>
                     {renderTextWithUnderline(listeningData.wordArr, listeningData.offset)}
                 </div>
-                <button type='submit'>정답 제출</button>
+                <button type='submit'>결과 제출</button>
             </form>
 
             <button type='button' onClick={turnToNextPage} disabled = {isCorrect}>다음 문제</button>
