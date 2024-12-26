@@ -72,7 +72,7 @@ export default function listening() {
                 )
 
             } else {
-                // 그 이외 단어들은 검은색 밑줄로 표시시
+                // 그 이외 단어들은 검은색 밑줄로 표시
                 return (
                     <span key={index} style={{ borderBottom: '2px solid black', margin : '10px' }}>
                         {word}
@@ -97,7 +97,7 @@ export default function listening() {
             alert("다음 페이지!")
         } 
         else {
-            alert("흠.. 정답을 맞추고 넘어가세요요")
+            alert("흠.. 정답을 맞추고 넘어가세요")
         }
     }
 
