@@ -8,6 +8,7 @@ export default function Speaking() {
   const [isRecording, setIsRecording] = useState(false); // 녹음 상태를 관리하는 변수
   const [transcript, setTranscript] = useState(""); // 텍스트 변환 결과를 관리하는 변수
   const [audioURL, setAudioURL] = useState(null); // 오디오 URL을 저장할 변수
+  const [problemIndex, setProblemIndex] = useState(1); // 문제 번호 변수
 
   // Reference to store the SpeechRecognition instance
   const recognitionRef = useRef(null); // 녹음이 되고 있는지를 저장할 변수
@@ -151,10 +152,10 @@ export default function Speaking() {
           <p className={styles.lesson}>Lesson 3</p>
         </div>
         <div className={styles.progressContainer}>
-          <div className={styles.progressBar}></div>
+          <div className={styles.progressBar} style={{ '--ratio': problemIndex }}></div>
         </div>
         <div className={styles.progressInfo}>
-          <p>10 / 30</p>
+          <p>{problemIndex} / 30</p>
         </div>
       </header>
 
@@ -222,7 +223,10 @@ export default function Speaking() {
 
       {/* 하단 확인 버튼 */}
       <footer className={styles.footer}>
-        <button className={styles.confirmButton}>확인</button>
+        <button className={styles.confirmButton} onClick={()=>{
+          {/* 문제 인덱스 변경 및 그에 따른 그래프 변화 */}
+          setProblemIndex(problemIndex+1);
+        }}>확인</button>
       </footer>
     </div>
   );
