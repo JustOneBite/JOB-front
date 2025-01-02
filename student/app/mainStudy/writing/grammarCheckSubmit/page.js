@@ -136,7 +136,7 @@ export default function Writing() {
         await handleClick()
 
         if(submitCount === 2){
-            router
+            router.push('./teacherCheckSubmit')
         }
     };
 
