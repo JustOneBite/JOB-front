@@ -10,7 +10,7 @@ export default function Reference() {
     return (
         <div>
             <button
-                onClick={() => router.push('./grammarCheckSubmit')} // 클릭 시 /reference로 이동
+                onClick={() => router.push('./writingStart')} // 클릭 시 /reference로 이동
                 style={{
                     marginTop: "20px",
                     padding: "10px 20px",
