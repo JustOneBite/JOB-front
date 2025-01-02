@@ -1,0 +1,18 @@
+.progressBar {
+    width: 60%;
+    margin : 0 auto;
+}
+
+.listeningHeader {
+    display: flex;
+    gap: 10px;
+}
+
+.listeningProblemBox {
+    width: 80%;
+    height: 500px;
+    display: grid;
+    justify-content: center; /* 수평 가운데 정렬 */
+    align-items: center;    /* 수직 가운데 정렬 */
+    border: 2px solid black;
+}
