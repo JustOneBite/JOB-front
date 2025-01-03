@@ -21,8 +21,8 @@ export default function WritingStart() {
                         'Content-Type': 'application/json',  // Content-Type을 JSON으로 설정
                     },
                     body: JSON.stringify({
-                        curriculumId: "64fd8570b1e2a4e334c8b34d",
-                        lessonId: "64fd8570b1e2a4e334c8b34e"
+                        curriculumId: "64fd8570b1e2a4e334c8b33d",
+                        lessonId: "64fd8570b1e2a4e334c8b33e"
                     }),
                     credentials: 'include'  // 쿠키를 포함하려면 이 설정 추가
                 });
@@ -33,10 +33,9 @@ export default function WritingStart() {
 
                 const temp_result = await response.json();
                 const result = temp_result.result
-
-                
                 
                 setWritingInfo({theme : result.theme, wordLimit : result.wordLimit})
+                
             } catch (err) {
                 setErrorMessage(err.message); // 오류 발생 시 상태에 오류 메시지 저장
             }

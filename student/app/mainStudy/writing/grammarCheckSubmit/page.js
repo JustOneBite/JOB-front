@@ -4,24 +4,26 @@ import { useRouter } from "next/navigation"; // useRouter 가져오기
 
 export default function Writing() {
 
-    const [writingText, setWritingText] = useState('')
-    const [writingInfo, setWritingInfo] = useState({ title: '', wordLimit: 0, content : '' })
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+    const [writingText, setWritingText] = useState('') //사용자가 작성하는는 writing text 저장.
+    const [writingInfo, setWritingInfo] = useState({ title: '', wordLimit: 0, content: ''})
     const [submitCount, setSubmitCount] = useState(0)
     const [grammerResult, setGrammerResult] = useState(null)
+
+    const btnTitleArr = ['1차 문법 검사', '2차 문법 검사', '선생님 검사']
+    const [btnTitle, setBtnTitle] = useState(btnTitleArr[0])
+
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+
     const [hasRun, setHasRun] = useState(false); // 새로고침 시 useEffect 재로드 방지용
     const router = useRouter(); // useRouter 초기화
 
-    const btnTitleArr = ['1차 문법 검사', '2차 문법 검사', '선생님 검사', '최종 제출']
-    const [btnTitle, setBtnTitle] = useState(btnTitleArr[0])
+    let savedContent = '' //  writingInfo에 저장할 content.
 
     useEffect(() => {
         // 비동기 함수로 API 호출
         const fetchData = async () => {
             try {
-
-                console.log("read 실행")
 
                 const response = await fetch('http://localhost:8080/writingData/read', {
                     method: "POST",
@@ -36,24 +38,31 @@ export default function Writing() {
                 })
 
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    throw new Error('Network response was not ok')
                 }
 
                 const temp_result = await response.json();
                 const result = temp_result.result
 
-                console.log("read 불러옴")
+                if(result.submitCnt === 0){
+                    //이전 페이지에서 사용자의 writing content 불러오기
+                    const storedContent = localStorage.getItem('content')
 
-                //사용자 writing 정보 불러오기
-                const storedContent = localStorage.getItem('content');
-                if (storedContent) {
-                    setContent(JSON.parse(storedContent));
+                    if (storedContent) {
+                        savedContent = JSON.parse(storedContent)
+                    } else {
+                        throw new Error('content is empty.')
+                    }
+
+                }else{
+                    savedContent = result.content
                 }
-                
-                setWritingInfo({ title: result.theme, wordLimit: result.wordLimit, content: storedContent }); // 응답에서 받은 writingInfo 저장
-                setWritingText(storedContent)
-                setSubmitCount(result.submitCnt)
 
+                // 응답에서 받은 writingInfo + content 저장
+                setWritingInfo({ title: result.theme, wordLimit: result.wordLimit, content: savedContent})
+                alert(writingInfo.content) // test
+                setWritingText(savedContent)
+                setSubmitCount(result.submitCnt)
 
                 //새로고침 시 grammar test가 1번 더 실행되는 것을 방지 
                 if (!hasRun) {
@@ -65,8 +74,6 @@ export default function Writing() {
                     let count = submitCount + 1
 
                     setSubmitCount(count)
-
-                    alert(submitCount)
                     
                     //처음 페이지 라우트 되었을 때 grammar test 실행
                     const grammarResponse = await fetch("http://localhost:8080/validator/writing", {
@@ -75,7 +82,7 @@ export default function Writing() {
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify({
-                            content: result.content,
+                            content: savedContent,
                         }),
                         credentials: "include",
                     });
@@ -104,8 +111,8 @@ export default function Writing() {
     }, []);
 
     useEffect(() => {
-        if(submitCount === 2){
-            router.push("./teacherCheckSubmit")
+        if(submitCount === 3){
+            return router.push("./teacherCheckSubmit")
         }
         if (submitCount < btnTitleArr.length) {
             setBtnTitle(btnTitleArr[submitCount]);
@@ -233,7 +240,7 @@ export default function Writing() {
         });
     
         // 마지막 부분 추가
-        highlightedParts.push(text.slice(lastIndex));
+        highlightedParts.push(text.slice(lastIndex))
     
         return <>{highlightedParts}</>; // 모든 부분을 React 요소로 반환
     };
