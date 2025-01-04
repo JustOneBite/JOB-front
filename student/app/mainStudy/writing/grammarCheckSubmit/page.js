@@ -138,7 +138,7 @@ export default function Writing() {
 
             setSubmitCount(count)
 
-            const response = await fetch('http://localhost:8080/writingData/update', {
+            const response = await fetch('http://localhost:8080/studentLesson/update', {
                 method: "PATCH",
                 headers: {
                     'Content-Type': 'application/json',  // Content-Type을 JSON으로 설정
@@ -231,7 +231,9 @@ export default function Writing() {
 
         await grammerCheck() // 문법 체크 진행행
 
-        await handleClick()
+        await incSubmitCnt() // submitCnt 1 증가가
+
+        await handleClick() // content 수정 내용 저장장
     };
 
     const highlightText = (text, issues) => {
