@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation"; // useRouter 가져오기
 
 export default function Writing() {
 
-    const [writingText, setWritingText] = useState('') //사용자가 작성하는는 writing text 저장.
-    const [writingInfo, setWritingInfo] = useState({ title: '', wordLimit: 0, content: ''})
+    const [writingText, setWritingText] = useState('') //학생이 작성하는 writing text 저장 (실시간 변경 가능능).
+    const [writingInfo, setWritingInfo] = useState({ title: '', wordLimit: 0 })
+    const [writingContent, setWritingContent] = useState('') //DB에 저장된 학생 writing content
     const [submitCount, setSubmitCount] = useState(0)
     const [grammerResult, setGrammerResult] = useState(null)
 
@@ -18,14 +19,12 @@ export default function Writing() {
     const [hasRun, setHasRun] = useState(false); // 새로고침 시 useEffect 재로드 방지용
     const router = useRouter(); // useRouter 초기화
 
-    let savedContent = '' //  writingInfo에 저장할 content.
-
     useEffect(() => {
         // 비동기 함수로 API 호출
         const fetchData = async () => {
             try {
 
-                const response = await fetch('http://localhost:8080/writingData/read', {
+                const writingDataResponse = await fetch('http://localhost:8080/writingData/read', {
                     method: "POST",
                     headers: {
                         'Content-Type': 'application/json',  // Content-Type을 JSON으로 설정
@@ -37,32 +36,37 @@ export default function Writing() {
                     credentials: 'include'  // 쿠키를 포함하려면 이 설정 추가
                 })
 
-                if (!response.ok) {
+                if (!writingDataResponse.ok) {
                     throw new Error('Network response was not ok')
                 }
 
-                const temp_result = await response.json();
-                const result = temp_result.result
+                const tempWritingDataResult = await writingDataResponse.json();
+                const writingDataResult = tempWritingDataResult.result
 
-                if(result.submitCnt === 0){
-                    //이전 페이지에서 사용자의 writing content 불러오기
-                    const storedContent = localStorage.getItem('content')
+                // 응답에서 받은 writingInfo 저장
+                setWritingInfo({ title: writingDataResult.theme, wordLimit: writingDataResult.wordLimit})
 
-                    if (storedContent) {
-                        savedContent = JSON.parse(storedContent)
-                    } else {
-                        throw new Error('content is empty.')
-                    }
+                // 학생이 작성한 writing content 불러오기
+                const studentLessonResponse = await fetch('http://localhost:8080/studentLesson/read', {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',  // Content-Type을 JSON으로 설정
+                    },
+                    body: JSON.stringify({
+                            searchType: 1,
+                            id: "67794cc250b5dfb6b7122316",
+                    }),
+                    credentials: 'include'  // 쿠키를 포함하려면 이 설정 추가
+                })
 
-                }else{
-                    savedContent = result.content
-                }
+                const tempStudentLessonResult = await studentLessonResponse.json()
+                const studentLessonResult = tempStudentLessonResult.result.studentData
 
-                // 응답에서 받은 writingInfo + content 저장
-                setWritingInfo({ title: result.theme, wordLimit: result.wordLimit, content: savedContent})
-                alert(writingInfo.content) // test
-                setWritingText(savedContent)
-                setSubmitCount(result.submitCnt)
+                alert(studentLessonResult.content)
+                
+                setWritingContent(studentLessonResult.content)
+                setWritingText(studentLessonResult.content)
+                setSubmitCount(studentLessonResult.submitCnt)
 
                 //새로고침 시 grammar test가 1번 더 실행되는 것을 방지 
                 if (!hasRun) {
@@ -70,10 +74,6 @@ export default function Writing() {
                     setHasRun(true); // 실행 여부를 기록
 
                     console.log("문법 검사")
-
-                    let count = submitCount + 1
-
-                    setSubmitCount(count)
                     
                     //처음 페이지 라우트 되었을 때 grammar test 실행
                     const grammarResponse = await fetch("http://localhost:8080/validator/writing", {
@@ -82,7 +82,7 @@ export default function Writing() {
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify({
-                            content: savedContent,
+                            content: studentLessonResult.content,
                         }),
                         credentials: "include",
                     });
@@ -202,6 +202,29 @@ export default function Writing() {
             setError(err.message)
         }
     }
+    
+    const incSubmitCnt = async () => {
+        try {
+
+            const incSumbitCntResponse = await fetch("http://localhost:8080/studentLesson/IncSubmitCnt", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    id: "67794cc250b5dfb6b7122316",
+                }),
+                credentials: "include",
+            });
+
+            if (!incSumbitCntResponse.ok) {
+                throw new Error("Failed to increase submitCnt.");
+            }
+
+        } catch (err) {
+            setError(err.message)
+        }
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault() //새로 고침 방지
@@ -209,8 +232,6 @@ export default function Writing() {
         await grammerCheck() // 문법 체크 진행행
 
         await handleClick()
-
-
     };
 
     const highlightText = (text, issues) => {
@@ -274,7 +295,7 @@ export default function Writing() {
             <div
                 style={{ border: '1px solid #ccc', padding: '10px', minHeight: '100px' }}
             >
-                {highlightText(writingInfo.content, grammerResult)}
+                {highlightText(writingContent, grammerResult)}
             </div>
         </div>
     )

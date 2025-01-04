@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation"; // useRouter 가져오기
 
 export default function TeacherCheckSubmit() {
 
-    const [writingText, setWritingText] = useState('')
+    const [writingText, setWritingText] = useState('') //학생이 작성하는 writing text 저장 (실시간 변경 가능능).
+    const [writingInfo, setWritingInfo] = useState({ title: '', wordLimit: 0 })
+    const [writingContent, setWritingContent] = useState('') //DB에 저장된 학생 writing content
+    const [submitCount, setSubmitCount] = useState(0)
+
     const router = useRouter(); // useRouter 초기화
 
     useEffect(() => {
@@ -13,7 +17,7 @@ export default function TeacherCheckSubmit() {
         const fetchData = async () => {
             try {
 
-                const response = await fetch('http://localhost:8080/writingData/read', {
+                const writingDataResponse = await fetch('http://localhost:8080/writingData/read', {
                     method: "POST",
                     headers: {
                         'Content-Type': 'application/json',  // Content-Type을 JSON으로 설정
@@ -25,73 +29,59 @@ export default function TeacherCheckSubmit() {
                     credentials: 'include'  // 쿠키를 포함하려면 이 설정 추가
                 })
 
-                if (!response.ok) {
+                if (!writingDataResponse.ok) {
                     throw new Error('Network response was not ok')
                 }
 
-                const temp_result = await response.json();
-                const result = temp_result.result
+                const tempWritingDataResult = await writingDataResponse.json();
+                const writingDataResult = tempWritingDataResult.result
 
-                // 응답에서 받은 writingInfo + content 저장
-                setWritingInfo({ title: result.theme, wordLimit: result.wordLimit, content: savedContent})
-                alert(writingInfo.content) // test
-                setWritingText(savedContent)
-                setSubmitCount(result.submitCnt)
+                // 응답에서 받은 writingInfo 저장
+                setWritingInfo({ title: writingDataResult.theme, wordLimit: writingDataResult.wordLimit})
 
-                //새로고침 시 grammar test가 1번 더 실행되는 것을 방지 
-                if (!hasRun) {
+                // 학생이 작성한 writing content 불러오기
+                const studentLessonResponse = await fetch('http://localhost:8080/studentLesson/read', {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',  // Content-Type을 JSON으로 설정
+                    },
+                    body: JSON.stringify({
+                            searchType: 1,
+                            id: "67794cc250b5dfb6b7122316",
+                    }),
+                    credentials: 'include'  // 쿠키를 포함하려면 이 설정 추가
+                })
 
-                    setHasRun(true); // 실행 여부를 기록
+                const tempStudentLessonResult = await studentLessonResponse.json()
+                const studentLessonResult = tempStudentLessonResult.result.studentData
+                
+                setWritingContent(studentLessonResult.content)
+                setWritingText(studentLessonResult.content)
+                setSubmitCount(studentLessonResult.submitCnt)
 
-                    console.log("문법 검사")
-
-                    let count = submitCount + 1
-
-                    setSubmitCount(count)
-                    
-                    //처음 페이지 라우트 되었을 때 grammar test 실행
-                    const grammarResponse = await fetch("http://localhost:8080/validator/writing", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            content: savedContent,
-                        }),
-                        credentials: "include",
-                    });
-        
-                    if (!grammarResponse.ok) {
-                        throw new Error("Failed to check grammar.");
-                    }
-        
-                    const checkedGrammarResult = await grammarResponse.json();
-        
-                    // 문법 검사 결과 업데이트
-                    setGrammerResult(checkedGrammarResult.grammarIssues);
-
-                }
-
-
+                // 학생이 작성한 content에 대한 선생님의 feedback을 불러와야 됨.
 
             } catch (err) {
                 setError(err.message); // 오류 발생 시 상태에 오류 메시지 저장
-            } finally {
-                setLoading(false); // 로딩 상태 변경
             }
-        };
+        }
 
-        fetchData();
-    }, []);
+        fetchData()
+
+    }, [])
 
     const handleSubmit = () =>{
         router.push('./finalSubmit')
     }
 
     const handleChange = (e) => {
-        writingText = e.target.value
-        setWritingText(writingText)
-    }
+        const inputText = e.target.value;
+        setWritingText(inputText);
+    };
+
+    const countWords = (text) => {
+        return text.length;
+    };
 
     return (
         <div>
