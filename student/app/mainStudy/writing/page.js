@@ -7,45 +7,50 @@ export default function Writing() {
 
     const router = useRouter(); // useRouter 초기화
 
-    // useEffect(() => {
-    //     // 비동기 함수로 API 호출
-    //     const fetchData = async () => {
-    //         try {
-    //             const response = await fetch('http://localhost:8080/writingData/read', {
-    //                 method: "POST",
-    //                 headers: {
-    //                     'Content-Type': 'application/json',  // Content-Type을 JSON으로 설정
-    //                 },
-    //                 body: JSON.stringify({
-    //                     curriculumId: "64fd8570b1e2a4e334c8b33d",
-    //                     lessonId: "64fd8570b1e2a4e334c8b33e",
-    //                     //studentId
-    //                 }),
-    //                 credentials: 'include'  // 쿠키를 포함하려면 이 설정 추가
-    //             });
-    //             if (!response.ok) {
-    //                 throw new Error('Network response was not ok');
-    //             }
-    //             const temp_result = await response.json();
-    //             const result = temp_result.result
+    const [textBookInfo, setTextBookInfo] = useState('')
+    // const type = ["vocab", "reading", "writing", "listening", "speaking"]
 
-    //             setWritingInfo({ title: result.theme, wordLimit: result.wordLimit, content: result.content }); // 응답에서 받은 writingInfo 저장
-    //             setWritingText(result.content)
-    //             setSubmitCount(result.submitCnt)
-    //         } catch (err) {
-    //             setError(err.message); // 오류 발생 시 상태에 오류 메시지 저장
-    //         } finally {
-    //             setLoading(false); // 로딩 상태 변경
-    //         }
-    //     };
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
-    //     fetchData();
-    // }, []);
+    // 학생에게 배정된 curriculum 정보 요청
+    useEffect(() => {
+        // 비동기 함수로 API 호출
+        const fetchData = async () => {
+            try {
+                const response = await fetch('http://localhost:8080/curriculum/get', {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',  // Content-Type을 JSON으로 설정
+                    },
+                    body: JSON.stringify({
+                        curriculumId: "6777ec2bc40d6f4cfbc496b1", // useEffect로 커리큘럼 정보 받아와야 함.
+                    }),
+                    credentials: 'include'  // 쿠키를 포함하려면 이 설정 추가
+                })
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const temp_result = await response.json();
+                const result = temp_result.result
 
+                setTextBookInfo( result.textBookInfo[0] ) //textBook title 저장
+
+            } catch (err) {
+                setError(err.message); // 오류 발생 시 상태에 오류 메시지 저장
+            } finally {
+                setLoading(false); // 로딩 상태 변경
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    // type, lesson num, date는 이전 페이지에서 불러옴.
     return (
         <div>
             <h4>Writing</h4>
-            <p>교재이름</p>
+            <p>{textBookInfo}</p>
             <p>학습레슨</p>
             <h5>1월 1일 ㅋ</h5>
             {/* 버튼 추가 */}
