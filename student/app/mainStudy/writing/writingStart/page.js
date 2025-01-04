@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation";
+import { getWritingData,updateStudentContent, incSubmitCnt } from "./util"
 
 export default function WritingStart() {
 
@@ -14,25 +15,13 @@ export default function WritingStart() {
         // 비동기 함수로 API 호출
         const fetchData = async () => {
             try {
-
-                const response = await fetch('http://localhost:8080/writingData/read', {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json',  // Content-Type을 JSON으로 설정
-                    },
-                    body: JSON.stringify({
-                        curriculumId: "64fd8570b1e2a4e334c8b33d",
-                        lessonId: "64fd8570b1e2a4e334c8b33e"
-                    }),
-                    credentials: 'include'  // 쿠키를 포함하려면 이 설정 추가
-                });
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                
+                const requestBody = {
+                    curriculumId: "64fd8570b1e2a4e334c8b33d",
+                    lessonId: "64fd8570b1e2a4e334c8b33e"
                 }
 
-                const temp_result = await response.json();
-                const result = temp_result.result
+                const result = await getWritingData(requestBody)
                 
                 setWritingInfo({theme : result.theme, wordLimit : result.wordLimit})
                 
@@ -53,10 +42,18 @@ export default function WritingStart() {
         return text.length
     }
 
-    const handleSubmit = (content) => {
+    const handleSubmit = async (content) => {
         //content 저장 하는 코드 추가해야함 및 학습 상태 업데이트
-        localStorage.setItem('content', JSON.stringify(content));
-        router.push("./grammarCheckSubmit");
+        try{
+            await updateStudentContent("6779518df0a21f808784b08d",content)
+
+            await incSubmitCnt("6779518df0a21f808784b08d")
+
+            router.push("./grammarCheckSubmit");
+        }
+        catch (err) {
+            setErrorMessage(err.message); // 오류 발생 시 상태에 오류 메시지 저장
+        }
     }
 
     return (
@@ -75,6 +72,8 @@ export default function WritingStart() {
                 <button onClick={() => handleSubmit(content)} disabled={countWords(content) === 0}> 1차 문법 검사 </button>
                 
             </div>
+
+            <div>{ errorMessage }</div>
         </div>
     )
 }
