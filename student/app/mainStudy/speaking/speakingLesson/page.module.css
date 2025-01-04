@@ -102,28 +102,40 @@
 
 
 /* 메인 컨텐츠 */
+.instruction {
+  font-size: 18px;
+  margin-top: 56px;
+  margin-bottom: 0;
+  color: var(--Black-1000, #1A1A1A);
+  text-align: center;
+
+  /* Ko/Sb/20 */
+  font-family: "Pretendard Variable";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 150%; /* 30px */
+}
+
 .main {
+  display: flex;
+  flex-direction: row;
   width: 100%;
-  max-width: 500px;
+  margin-top: 64px;
+  max-width: 920px;
   text-align: center;
   flex: 1;
 }
 
-.instruction {
-  font-size: 18px;
-  margin-top: 80px;
-  margin-bottom: 20px;
-  color: #333;
-}
-
 .sentenceBox {
-  background: white;
-  height: 200px;
-  padding: 20px;
-  margin-top: 30px;;
-  margin-bottom: 30px;
-  border: solid #333;
-  border-radius: 10px;
+  background: #FEFEFE;
+  height: 380px;
+  width: 448px;
+  /* padding: 20px; */
+  /* margin-top: 30px; */
+  /* margin-bottom: 30px; */
+  border: 2px solid #FEDAA6;
+  border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   font-size: 20px;
   line-height: 1.5;
@@ -137,6 +149,101 @@
   margin: 0;
 }
 
+.recordBox{
+  height: 380px;
+  width: 460px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.syncPercent {
+  margin-top: 40px;
+  margin-bottom: 0;
+
+  color: #1A1A1A;
+  text-align: center;
+
+  /* Ko/Md/17 */
+  font-family: "Pretendard Variable";
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 150%; /* 25.5px */
+}
+
+.dots {
+  display: flex;
+  justify-content: space-between;
+  width: 186px;
+  margin-top: 28px;
+}
+
+.dots div{
+  width: 38px;
+  height: 57px;
+}
+
+.dots p {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
+.mic {
+  margin-top: 48px;
+}
+
+.micButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  width: 76px;
+  height: 76px;
+  border: none;
+  background: #FFA321;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.micButton:hover {
+  background: #FFC779;
+}
+
+.micInstruction {
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+
+.micInstruction p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.mainInstruction {
+  color: #333;
+  text-align: center;
+
+  /* Ko/Sb/18 */
+  font-family: "Pretendard Variable";
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 150%; /* 27px */
+}
+
+.subInstruction {
+  color: #4D4D4D;
+  text-align: center;
+
+  /* Ko/Md/15 */
+  font-family: "Pretendard Variable";
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 150%; /* 22.5px */
+}
+
 /* 수평 컨트롤 영역 */
 .horizontalControls {
   display: flex;
@@ -148,40 +255,6 @@
   margin-top: 20px;
 }
 
-.micButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  width: 48px;
-  height: 48px;
-  border: none;
-  background: #e0e0e0;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.micButton:hover {
-  background: #d6d6d6;
-}
-
-.micButton .material-icons {
-  font-size: 24px;
-  color: #333;
-}
-
-.dots {
-  display: flex;
-  justify-content: space-between;
-  width: 130px;
-}
-
-.dots div {
-  width: 20px;
-  height: 20px;
-  background: #6c757d;
-  border-radius: 50%;
-}
 
 .audioContainer {
   width: 50%;  /* 또는 원하는 고정 값 예: 400px */
