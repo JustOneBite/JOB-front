@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation";
-import { getWritingData,updateStudentContent, incSubmitCnt } from "./util"
+import { getWritingData,updateStudentContent, incSubmitCnt } from "./util"
 
 export default function WritingStart() {
 
