@@ -1,233 +1,33 @@
-"use client";
-
-// 리엑트 컴포넌트와 모듈 임포트
-import { useEffect, useState, useRef } from "react";
-import styles from './page.module.css'; // CSS 모듈 임포트
+import styles from './page.module.css';
+import Link from 'next/link';
 
 export default function Speaking() {
-  const [isRecording, setIsRecording] = useState(false); // 녹음 상태를 관리하는 변수
-  const [transcript, setTranscript] = useState(""); // 텍스트 변환 결과를 관리하는 변수
-  const [audioURL, setAudioURL] = useState(null); // 오디오 URL을 저장할 변수
-  const [problemIndex, setProblemIndex] = useState(1); // 문제 번호 변수
+    const date = new Date();
 
-  // Reference to store the SpeechRecognition instance
-  const recognitionRef = useRef(null); // 녹음이 되고 있는지를 저장할 변수
-  const mediaRecorderRef = useRef(null); // MediaRecorder 인스턴스를 저장할 변수
-  const audioChunksRef = useRef([]); // 오디오 청크들을 저장할 변수
+    return(
+        <div className={styles.wrapper}>
+            <div className={styles.container}>
+                <div className={styles.backBtn}>
+                    <Link href="../../page.js">
+                        뒤로가기
+                    </Link>
+                </div>
 
-  // 녹음 시작 함수
-  const startRecording = () => {
-    setIsRecording(true);
-
-    // 오디오 녹음을 위한 음원 녹음기 설정
-    navigator.mediaDevices
-      .getUserMedia({ audio: true })
-      .then((stream) => {
-        // 새로운 녹음을 시작하기 전에 기존 오디오 청크를 초기화
-        audioChunksRef.current = [];
-
-        mediaRecorderRef.current = new MediaRecorder(stream);
-
-        mediaRecorderRef.current.ondataavailable = (event) => {
-          audioChunksRef.current.push(event.data);
-        };
-
-        mediaRecorderRef.current.onstop = () => {
-          // 녹음이 종료되면 새로운 오디오 데이터 URL을 생성
-          const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          setAudioURL(audioUrl); // 오디오 URL을 최신화
-          audioChunksRef.current = []; // 다음 녹음을 위해 오디오 청크 초기화
-        };
-
-        mediaRecorderRef.current.start();
-      })
-      .catch((error) => console.error("Error accessing media devices.", error));
-
-    // 새로운 SpeechRecognition 인스턴스를 생성하고 설정
-    recognitionRef.current = new window.webkitSpeechRecognition();
-    recognitionRef.current.continuous = true;
-    recognitionRef.current.interimResults = true;
-
-    // 음성인식 결과를 위한 Event handler
-    recognitionRef.current.onresult = (event) => {
-      const { transcript } = event.results[event.results.length - 1][0];
-      setTranscript(transcript);
-    };
-
-    // 음성인식 시작
-    recognitionRef.current.start();
-  };
-
-  // 페이지 전환을 하거나 컴포넌트가 언마운트 되면 음성인식, 미디어 녹음을 중지
-  useEffect(() => {
-    return () => {
-      // 음성 인식(Recognition)이 활성화되어 있으면 중지
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-       // 2. 미디어 녹음(MediaRecorder)이 활성화 상태이면 중지
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
-        mediaRecorderRef.current.stop();
-      }
-    };
-  }, []);  // 빈 배열을 전달하여, 컴포넌트가 마운트될 때 한 번만 실행되고, 언마운트 시 실행되도록 함
-
-  // 녹음 정지 함수
-  const stopRecording = () => {
-    // 음성 인식이 켜져있으면 중지
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-    // 음성녹음이 켜져있으면 중지
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
-      mediaRecorderRef.current.stop();
-    }
-  };
-
-  // 녹음을 시작/중지 해주는 함수
-  const handleToggleRecording = () => {
-    if (!isRecording) {
-      startRecording();
-    } else {
-      stopRecording();
-      setIsRecording(false);
-    }
-  };
-
-  const micButtonStyle = isRecording ? styles.micButtonRecording : styles.micButtonIdle;
-
-  // 녹음 상태에 따라 적절한 UI를 렌더링하는 부분
-  // return (
-  //   <div className={styles.container}>
-  //     <div>
-  //       {/* 현재 녹음 상태를 보여줌 */}
-  //       {(isRecording || transcript) && (
-  //         <div>
-  //           <div className={styles.status}>
-  //             <p>{!isRecording ? "녹음 완료" : "녹음 중"}</p>
-  //             <p>
-  //               {!isRecording ? "말해 주셔서 감사합니다." : "말씀을 시작하세요..."}
-  //             </p>
-  //           </div>
-            
-  //           {/* 녹음된 음원의 텍스트 버전을 보여줌 */}
-  //           {transcript && (
-  //             <div className={styles.transcript}>
-  //               <p>{transcript}</p>
-  //             </div>
-  //           )}
-  //         </div>
-  //       )}
-
-  //       {/* 녹음 시작 정지 버튼 */}
-  //       <div>
-  //         {isRecording ? (
-  //           <button onClick={handleToggleRecording} className={styles.btn}>중지</button>
-  //         ) : (
-  //           <button onClick={handleToggleRecording} className={styles.btn}>시작</button>
-  //         )}
-  //       </div>
-
-  //       {/* 최신 오디오 파일을 렌더링하며, 가장 최근 녹음만 표시하도록 함 */}
-  //       {audioURL && (
-  //         <div className={styles.audioContainer}>
-  //           <p>녹음된 오디오:</p>
-  //           <audio key={audioURL} controls>
-  //             <source src={audioURL} type="audio/wav" />
-  //             브라우저에서 오디오 요소를 지원하지 않습니다.
-  //           </audio>
-  //         </div>
-  //       )}
-  //     </div>
-  //   </div>
-  // );
-  return (
-    <div className={styles.container}>
-
-      {/* 상단 헤더 */}
-      <header className={styles.header}>
-        <div className={styles.titleContainer}>
-          <p className={styles.title}>Speaking</p>
-          <p className={styles.lesson}>Lesson 3</p>
-        </div>
-        <div className={styles.progressContainer}>
-          <div className={styles.progressBar} style={{ '--ratio': problemIndex }}></div>
-        </div>
-        <div className={styles.progressInfo}>
-          <p>{problemIndex} / 30</p>
-        </div>
-      </header>
-
-      {/* 메인 컨텐츠 */}
-      <main className={styles.main}>
-        {/* Google Font 아이콘 불러오기 */}
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-
-        <p className={styles.instruction}>다음 문장을 발음해보세요</p>
-        <div className={styles.sentenceBox}>
-          <p className={styles.sentence}>Happy solo Christmas and a solo new year</p>
-        </div>
-        {/* 현재 녹음 상태를 보여줌 */}
-        
-        {(isRecording || transcript) && (
-          <div>
-            <div className={styles.status}>
-              <p>{!isRecording ? "녹음 완료" : "녹음 중"}</p>
-              <p>
-                {!isRecording ? "말해 주셔서 감사합니다." : "말씀을 시작하세요..."}
-              </p>
+                <div className={styles.title}>
+                    <p>Speaking</p>
+                </div>
+                <div className={styles.subTitle}>
+                    <p>교재이름<br/>학습유닛/레슨</p>
+                </div>
+                <div className={styles.date}>
+                    <p>{date.getMonth()+1}월 {date.getDate()}일</p>
+                </div>
+                <div className={styles.startBtn}>
+                    <Link href="speaking/speakingLesson" className={styles.start}>
+                        학습 시작하기
+                    </Link>
+                </div>
             </div>
-            
-            {/* 녹음된 음원의 텍스트 버전을 보여줌 */}
-            {transcript && (
-              <div className={styles.transcript}>
-                <p>{transcript}</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* 수평 컨트롤 영역 */}
-        <div className={styles.horizontalControls}>
-          {/* 마이크 버튼 */}
-          <div>
-            {isRecording ? (
-              <button onClick={handleToggleRecording} className={micButtonStyle}><span className="material-icons">mic</span></button>
-            ) : (
-              <button onClick={handleToggleRecording} className={micButtonStyle}><span className="material-icons">mic</span></button>
-            )}
-          </div>
-
-          {/* 진행 점 */}
-          <div className={styles.dots}>
-            <div></div>
-            <div></div>
-            <div></div>
-          </div>
-
-          {/* 오디오 재생 버튼 */}
-          {/* 최신 오디오 파일을 렌더링하며, 가장 최근 녹음만 표시하도록 함. 녹음된 오디오 다운로드 기능 삭제*/}
-          <div className={styles.audioContainer}>
-            <audio className={styles.audioPlayer} key={audioURL} controlsList="nodownload" controls>
-              {audioURL ? (
-                <source src={audioURL} type="audio/wav" />
-              ) : (
-                <track kind="descriptions" label="No audio available" />
-              )}
-              브라우저에서 오디오 요소를 지원하지 않습니다.
-            </audio>
-          </div>
         </div>
-      </main>
-
-      {/* 하단 확인 버튼 */}
-      <footer className={styles.footer}>
-        <button className={styles.confirmButton} onClick={()=>{
-          {/* 문제 인덱스 변경 및 그에 따른 그래프 변화 */}
-          setProblemIndex(problemIndex+1);
-        }}>확인</button>
-      </footer>
-    </div>
-  );
+    )
 }

@@ -1,0 +1,268 @@
+/* 전체 컨테이너 */
+.wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #FFF8ED;
+  color: #333;
+  width: 1512px;
+}
+  
+/* 헤더 */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 106px;
+  width: 998px;
+  margin-top: 64px;
+}
+
+.titleContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  margin:0;
+  color: #1A1A1A;
+  text-align: center;
+
+  /* Ko/Md/17 */
+  font-family: "Pretendard Variable";
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 150%; /* 25.5px */
+}
+
+.lesson {
+  margin:0;
+  color: #666;
+
+  /* Ko/Sb/17 */
+  font-family: "Pretendard Variable";
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 150%; /* 25.5px */
+}
+
+.progressContainer {
+  margin-top: 24.5px;
+  display: flex;
+  justify-content: space-between;
+  
+}
+
+.progressBar {
+  margin: 0;
+  width: 920px;
+  height: 25px;
+  background: #CBE6F5;
+  border: 2px solid #98CDEC;
+  border-radius: 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progressBar::after {
+  margin: 0;
+  content: '';
+  display: block;
+  width: calc(100% * (var(--ratio) / 30));
+  height: 100%;
+  background: #007bff;
+  border-radius: 48px;
+  transition: width 0.6s ease-in-out;
+}
+
+.progressInfo {
+  margin: 0;
+  width: 52px;
+  height: 26px;
+  color: #1A1A1A;
+  text-align: right;
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 150%; /* 25.5px */
+}
+
+
+/* 메인 컨텐츠 */
+.main {
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  flex: 1;
+}
+
+.instruction {
+  font-size: 18px;
+  margin-top: 80px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.sentenceBox {
+  background: white;
+  height: 200px;
+  padding: 20px;
+  margin-top: 30px;;
+  margin-bottom: 30px;
+  border: solid #333;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: 20px;
+  line-height: 1.5;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sentence {
+  margin: 0;
+}
+
+/* 수평 컨트롤 영역 */
+.horizontalControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  width: 100%;
+  max-width: 500px;
+  margin-top: 20px;
+}
+
+.micButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  width: 48px;
+  height: 48px;
+  border: none;
+  background: #e0e0e0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.micButton:hover {
+  background: #d6d6d6;
+}
+
+.micButton .material-icons {
+  font-size: 24px;
+  color: #333;
+}
+
+.dots {
+  display: flex;
+  justify-content: space-between;
+  width: 130px;
+}
+
+.dots div {
+  width: 20px;
+  height: 20px;
+  background: #6c757d;
+  border-radius: 50%;
+}
+
+.audioContainer {
+  width: 50%;  /* 또는 원하는 고정 값 예: 400px */
+  max-width: 100%;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.audioPlayer {
+  width: 100%; /* 또는 고정 크기 예: 400px */
+  height: 40px; /* 오디오 플레이어 높이를 고정 */
+  object-fit: contain;  /* 필요 시 오디오 비율 맞추기 */
+}
+
+
+.audioButton {
+  font-size: 16px;
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.audioButton:hover {
+  color: #0056b3;
+}
+
+/* 하단 확인 버튼 */
+.footer {
+  display: flex;
+  width: 100%;
+  /* max-width: 500px; */
+  margin-top: 30px;
+  text-align: center;
+}
+
+.confirmButton {
+  width: 100px;
+  padding: 15px;
+  margin-left: auto;
+  margin-right: 2%;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  background: #007bff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.confirmButton:hover {
+  background: #0056b3;
+}
+
+.micButtonRecording {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background-color: red; /* 녹음 중일 때 빨간색 */
+  color: white;
+}
+
+.micButtonIdle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background-color: #333; /* 녹음 중이 아닐 때 기본 색상 */
+  color: white;
+}
