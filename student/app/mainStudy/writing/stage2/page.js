@@ -45,9 +45,9 @@ export default function WritingStart() {
     const handleSubmit = async (content) => {
         //content 저장 하는 코드 추가해야함 및 학습 상태 업데이트
         try{
-            await updateStudentContent("6779518df0a21f808784b08d",content)
+            await updateStudentContent("67794cc250b5dfb6b7122316",content)
 
-            await incSubmitCnt("6779518df0a21f808784b08d")
+            await incSubmitCnt("67794cc250b5dfb6b7122316")
 
             router.push("./grammarCheckSubmit");
         }
