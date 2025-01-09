@@ -1,0 +1,108 @@
+.container {
+    padding: 20px;
+  }
+  
+.header {
+    text-align: left;
+    margin-bottom: 20px;
+    margin-top: 0px;
+}
+
+.formGroup {
+    flex: 1;
+    display: flex;
+    gap:8px;
+    flex-direction: column;
+    padding-right: 20px
+  }
+  
+.rowGroup {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.titleGroup {
+    flex: 5;
+  }
+  
+  .categoryGroup {
+    flex: 3;
+  }
+  
+  .authorGroup {
+    flex: 2;
+  }
+
+.textLabel {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    
+}
+
+.input,
+.textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 16px;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.textarea {
+    resize: none;
+    height: 230px;
+    padding-right: 10px
+}
+
+.titleInput{
+    width: 100%;
+    padding: 10px;
+    padding-right: 30px;
+    border: 1px solid #ddd;
+    border-radius: 16px;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap :30px;
+}
+
+.btnSubmit {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 16px;
+    background-color: #0070f3;
+    color: white;
+}
+
+.btnSubmit:hover{
+    background-color: #005bb5;
+}
+
+.btnCancel {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 16px;
+    background-color: #4fa0fd;
+    color: white;
+    text-decoration: none;
+}
+
+.btnCancel:hover{
+    background-color: #005bb5;
+}
+
+.rightTransposition{
+    transform: translateX(20px);
+}

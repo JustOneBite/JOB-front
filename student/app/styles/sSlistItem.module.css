@@ -1,0 +1,23 @@
+/* 전체 게시물 목록을 감싸는 스타일 */
+
+
+/* 헤더와 게시물 목록 항목들을 동일하게 스타일링 */
+.navbar {
+    display: grid;
+    grid-template-columns: 2fr 3fr 10fr 3fr 3fr 3fr; /* 각 항목의 비율을 설정 */
+    gap: 10px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    border-bottom: 1px solid #ccc;
+    padding: 8px 0;
+}
+
+/* 각 항목 스타일 */
+.navbarItem {
+    padding: 0px;
+    text-align: center;
+    
+    border: 1px solid #eee;
+}
+
+

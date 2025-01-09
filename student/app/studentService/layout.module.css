@@ -1,0 +1,73 @@
+.navContainer{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    /* background-color: aqua; */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 버튼에 그림자 추가 */
+}
+
+.jobLogo {
+    width: 100px;
+    height: 40px;
+    background-color: white;
+    color: #0070f3; /* 로고의 임시 색상 */
+    font-size: 32px;
+    text-align: center;
+    border: none;
+    border-radius: 16px;
+    font-weight: bold;
+    
+  }
+
+.navElements{
+    
+    display: flex;
+}
+
+.navList{
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.navItem {
+    margin-right: 1.5rem;
+    font-size: 16px;
+    background-color: #0070f3;
+    padding: 5px;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 버튼에 그림자 추가 */
+}
+
+.navItem:hover{
+    background-color: #005bb5;
+}
+
+.navItem a {
+    text-decoration: none;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.logout {
+    margin-left: 80px; /* 오른쪽 정렬 */
+    font-size: 16px;
+    text-align: center;
+    background-color: white;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+  
+.logout:hover{
+    background-color: #ccc;
+}
+
+.logout a {
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+}

@@ -1,0 +1,116 @@
+
+.container {
+    padding: 20px;
+  }
+  
+  .header {
+    text-align: left;
+    margin-bottom: 20px;
+    margin-top: 0px;
+  }
+  
+  .filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .toggleButtons{
+    position: relative;
+  }
+
+  .toggleButtons button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background-color: white;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .toggleButtons button:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .active {
+    background-color: #0070f3 !important;
+    color: white;
+  }
+  
+  .categoryDropdown {
+    position: absolute; /* 버튼 바로 아래에 표시되도록 절대 위치 */
+    top: 100%; /* 버튼 바로 아래에 위치시킴 */
+    left: 0;
+    width: 100%; /* 드롭다운의 너비를 버튼 너비와 동일하게 설정 */
+    margin-top: 5px; /* 버튼과 드롭다운 사이에 간격을 줌 */
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000; /* 드롭다운 메뉴가 다른 요소들 위에 표시되도록 설정 */
+  }
+  
+  .categoryDropdown button {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    text-align: left;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+  
+  .categoryDropdown button:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .searchInput {
+    padding: 8px 12px;
+    margin-left: 20px;
+    flex-grow: 1;
+    border: 1px solid #ccc;
+  }
+  
+  .writeBtn {
+    padding: 10px 20px;
+    background-color: #0070f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-decoration: none;
+  }
+  
+  .writeBtn:hover {
+    background-color: #005bb5;
+  }
+  
+  .postList {
+    margin-top: 20px;
+  }
+  
+/* Nav바 CSS설정? */
+.navbar {
+  display: grid;
+  grid-template-columns: 2fr 3fr 10fr 3fr 3fr 3fr;
+  gap: 10px;
+  margin-bottom: 15px;
+  margin-top: -15px;
+  font-weight: bold;
+  border-bottom: 2px solid #ccc;
+  padding: 8px 0;
+}
+
+.navbarItem {
+  padding: 8px;
+  text-align: center;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+}
+
+.navbar {
+  display: grid;
+  grid-template-areas:
+    "번호 카테고리 제목 등록자 등록일 상태";
+}

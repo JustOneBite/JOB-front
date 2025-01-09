@@ -12,5 +12,10 @@
     "react": "^18",
     "react-dom": "^18",
     "next": "14.2.20"
-  }
+  },
+  "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
+  "main": "DBdata.js",
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {}
 }
