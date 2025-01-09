@@ -1,40 +1,47 @@
 'use client'
 
+import {mainPage, getWritingData, updateStudentContent, incSubmitCnt, readStudentLesson, writingValidator} from "../../util/writingUtil"
+import {StartPage} from "./stage0/startPage"
+import {ReferencePage} from "./stage1/referencePage"
+import {FirstWritingPage} from "./stage2/firstWritingPage"
+import {GrammarCheckPage} from "./stage3/grammarCheckPage"
+import {TeacherFeedbackPage} from "./stage4/teacherFeedbackPage"
+import {FinalSubmitPage} from "./stage5/finalSubmitPage"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"; // useRouter 가져오기 
 
-export default function Writing() {
+export default function WritingController() {
 
-    const router = useRouter(); // useRouter 초기화
+    const [stageLevel, setStageLevel] = useState(0) // 0 - writingMainPage 1 - referencePage 2 - firstWriting 3 - grammarCheck 4 - teacherFeedback 5 - finalSubmit
 
-    const [textBookInfo, setTextBookInfo] = useState('')
-    // const type = ["vocab", "reading", "writing", "listening", "speaking"]
+    const [studentContent, setStudentContent] = useState('')
+    const [teacherFeedback, setTeacherFeedback] = useState([])
+    const [submitCnt, setSubmitCnt] = useState(0)
+    const [theme, setTheme] = useState('')
+    const [wordLimit, setWordLimit] = useState('')
+    const [reference, setReference] = useState([])
+
+    const [currentStageLevel, setCurrentStageLevel] = useState(0)
+    const [ComponentToRender, setComponentToRender] = useState(null)
 
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+
+    // studentContent, teacherFeedback, submitCnt // theme, wordLimit, reference
 
     // 학생에게 배정된 curriculum 정보 요청
     useEffect(() => {
         // 비동기 함수로 API 호출
         const fetchData = async () => {
             try {
-                const response = await fetch('http://localhost:8080/curriculum/get', {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json',  // Content-Type을 JSON으로 설정
-                    },
-                    body: JSON.stringify({
-                        curriculumId: "6777ec2bc40d6f4cfbc496b1", // useEffect로 커리큘럼 정보 받아와야 함.
-                    }),
-                    credentials: 'include'  // 쿠키를 포함하려면 이 설정 추가
-                })
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const temp_result = await response.json();
-                const result = temp_result.result
-
-                setTextBookInfo( result.textBookInfo[0] ) //textBook title 저장
+                //  const resultStudentData = await readStudentLesson(studentId, searchDate)
+                //  setStudentContent(resultStudentData.studentData.content)
+                //  setTeacherFeedback(resultStudentData.studentData.teacherFeedback)
+                //  setSubmitCnt(resultStudentData.studentData.submitCnt)
+                 
+                //  const resultWritingData = await getWritingData()
+                //  setTheme(resultWritingData.theme)
+                //  setWordLimit(resultWritingData.wordLimit)
+                //  setReference(resultWritingData.reference)
 
             } catch (err) {
                 setError(err.message); // 오류 발생 시 상태에 오류 메시지 저장
@@ -46,28 +53,43 @@ export default function Writing() {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        if(currentStageLevel === 0){
+            console.log("111111")
+            setComponentToRender(()=>StartPage)
+        }else if(currentStageLevel === 1){
+            setComponentToRender(()=>ReferencePage)
+        }else if(currentStageLevel === 2){
+            setComponentToRender(()=>FirstWritingPage)
+        }else if(currentStageLevel === 3){
+            setComponentToRender(()=>GrammarCheckPage) 
+        }else if(currentStageLevel === 4){
+            setComponentToRender(()=>TeacherFeedbackPage)
+        }else if(currentStageLevel === 5){
+            setComponentToRender(()=>FinalSubmitPage)     
+        }
+
+    }, [currentStageLevel])
+
+    const handleVocabPass = (content) => {
+
+        setStudentContent(content)
+
+    };
+
     // type, lesson num, date는 이전 페이지에서 불러옴.
     return (
         <div>
-            <h4>Writing</h4>
-            <p>{textBookInfo}</p>
-            <p>학습레슨</p>
-            <h5>1월 1일 ㅋ</h5>
-            {/* 버튼 추가 */}
-            <button
-                onClick={() => router.push('./writing/reference')} // 클릭 시 /reference로 이동
-                style={{
-                    marginTop: "20px",
-                    padding: "10px 20px",
-                    backgroundColor: "#0070f3",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                }}
-            >
-                학습하기
-            </button>
+           {
+                ComponentToRender ? (
+                    <ComponentToRender
+                    studentContent = {studentContent}
+                    onTestComplete={(content) => handleVocabPass(content)}
+                    />
+                ) : (
+                    <div>Loading...</div> // 로딩 상태 표시
+                )
+            }
         </div>
     )
 }

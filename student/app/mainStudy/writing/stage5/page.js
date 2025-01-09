@@ -1,13 +1,9 @@
-'use client'
+'use Client'
 
-import { useEffect, useState} from 'react'
-
-export default function FinalSubmit(){
-
-
+export default function Stage0(){
     return (
         <div>
-            
+            <p>Hello world! stage5</p>
         </div>
     )
 }
