@@ -85,7 +85,7 @@ export async function incSubmitCnt(id){
     }
 }
 
-export async function readStudentLesson(studentId, searchDate){
+export async function readStudentLesson(studentLessonId){
     try{
 
         const response = await fetch('http://localhost:8080/studentLesson/read', {
@@ -94,9 +94,8 @@ export async function readStudentLesson(studentId, searchDate){
                 'Content-Type': 'application/json',  // Content-Type을 JSON으로 설정
             },
             body: JSON.stringify({
-                    searchType: 3,
-                    id: studentId,
-                    searchDate: searchDate
+                    searchType: 1,
+                    id: studentLessonId,
             }),
             credentials: 'include'  // 쿠키를 포함하려면 이 설정 추가
         })

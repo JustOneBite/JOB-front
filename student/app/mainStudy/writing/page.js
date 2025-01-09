@@ -1,12 +1,13 @@
 'use client'
 
 import {mainPage, getWritingData, updateStudentContent, incSubmitCnt, readStudentLesson, writingValidator} from "../../util/writingUtil"
-import {StartPage} from "./stage0/startPage"
-import {ReferencePage} from "./stage1/referencePage"
-import {FirstWritingPage} from "./stage2/firstWritingPage"
-import {GrammarCheckPage} from "./stage3/grammarCheckPage"
-import {TeacherFeedbackPage} from "./stage4/teacherFeedbackPage"
-import {FinalSubmitPage} from "./stage5/finalSubmitPage"
+
+import StartPage from "./stage0/startPage"
+import ReferencePage from "./stage1/referencePage"
+import FirstWritingPage from "./stage2/firstWritingPage"
+import GrammarCheckPage from "./stage3/grammarCheckPage"
+import TeacherFeedbackPage from "./stage4/teacherFeedbackPage"
+import FinalSubmitPage from "./stage5/finalSubmitPage"
 import { useEffect, useState } from "react"
 
 export default function WritingController() {
@@ -19,6 +20,14 @@ export default function WritingController() {
     const [theme, setTheme] = useState('')
     const [wordLimit, setWordLimit] = useState('')
     const [reference, setReference] = useState([])
+    const [allocatedDate, setAllocatedDate] = useState(null)
+
+    const [stageOneData,setStageOneData] = useState([])
+    const [stageTwoData,setStageTwoData] = useState([])
+    const [stageThreeData,setStageThreeData] = useState([])
+    const [stageFourData,setStageFourData] = useState([])
+    const [stageFiveData,setStageFiveData] = useState([])
+
 
     const [currentStageLevel, setCurrentStageLevel] = useState(0)
     const [ComponentToRender, setComponentToRender] = useState(null)
@@ -33,15 +42,22 @@ export default function WritingController() {
         // 비동기 함수로 API 호출
         const fetchData = async () => {
             try {
-                //  const resultStudentData = await readStudentLesson(studentId, searchDate)
-                //  setStudentContent(resultStudentData.studentData.content)
-                //  setTeacherFeedback(resultStudentData.studentData.teacherFeedback)
-                //  setSubmitCnt(resultStudentData.studentData.submitCnt)
-                 
-                //  const resultWritingData = await getWritingData()
-                //  setTheme(resultWritingData.theme)
-                //  setWordLimit(resultWritingData.wordLimit)
-                //  setReference(resultWritingData.reference)
+
+                const studentLessonId = "677b977fe5c781a4dec77d34"
+                const resultStudentData = await readStudentLesson(studentLessonId)
+
+                setStudentContent(resultStudentData.studentData.content)
+                setTeacherFeedback(resultStudentData.studentData.teacherFeedback)
+                setSubmitCnt(resultStudentData.studentData.submitCnt)
+                setAllocatedDate(resultStudentData.allocatedDate)
+                
+
+                const writingDataId = "6776c6c51dc045f5cf7530cb"
+                const resultWritingData = await getWritingData({id:writingDataId})
+
+                setTheme(resultWritingData.theme)
+                setWordLimit(resultWritingData.wordLimit)
+                setReference(resultWritingData.reference)
 
             } catch (err) {
                 setError(err.message); // 오류 발생 시 상태에 오류 메시지 저장
@@ -54,8 +70,8 @@ export default function WritingController() {
     }, []);
 
     useEffect(() => {
+
         if(currentStageLevel === 0){
-            console.log("111111")
             setComponentToRender(()=>StartPage)
         }else if(currentStageLevel === 1){
             setComponentToRender(()=>ReferencePage)
@@ -71,25 +87,34 @@ export default function WritingController() {
 
     }, [currentStageLevel])
 
-    const handleVocabPass = (content) => {
-
-        setStudentContent(content)
-
+    const handleCurrentStage = (updateData) => {
+        setStudentContent(updateData.content)
+        setSubmitCnt(updateData+1)
+        setCurrentStageLevel(currentStageLevel + 1)
     };
+
+    const handletSendingData = () => {
+        const stageData = [stageOneData, stageTwoData, stageTwoData, stageThreeData, stageFourData, stageFiveData];
+        return stageData[currentStageLevel] || null; // 안전한 반환
+    }
 
     // type, lesson num, date는 이전 페이지에서 불러옴.
     return (
         <div>
-           {
+        {
                 ComponentToRender ? (
                     <ComponentToRender
-                    studentContent = {studentContent}
-                    onTestComplete={(content) => handleVocabPass(content)}
+                    data = { handletSendingData() }
+                    onTestComplete={(updateData) => handleCurrentStage(updateData)}
                     />
                 ) : (
                     <div>Loading...</div> // 로딩 상태 표시
                 )
-            }
+        }
+
+        <div>
+            {studentContent}, {teacherFeedback},{submitCnt},{theme},{wordLimit},{reference}
+        </div>
         </div>
     )
 }

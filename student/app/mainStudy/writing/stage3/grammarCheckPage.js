@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"; // useRouter 가져오기
 
-export default function Writing() {
+export default function GrammerCheck() {
 
     const [writingText, setWritingText] = useState('') //학생이 작성하는 writing text 저장 (실시간 변경 가능능).
     const [writingInfo, setWritingInfo] = useState({ title: '', wordLimit: 0 })
