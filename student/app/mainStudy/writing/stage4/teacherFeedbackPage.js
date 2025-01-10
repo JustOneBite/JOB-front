@@ -11,16 +11,13 @@ export default function TeacherCheckSubmit({data, onComplete}) {
     const [errorMessage, setErrorMessage] = useState('')
 
     useEffect(() => {
-        if (data && data.studentContent !== undefined) {
-            setWritingContent(data.studentContent);
-            setWritingText(data.studentContent);
-            setSubmitCount(data.submitCnt);
-        } else {
-            setErrorMessage("데이터가 로드되지 않았습니다.");
-        }
-    
-        console.log(data, "teacherFeedBack");
-    }, [data]);
+
+        
+        setWritingContent(data.studentContent);
+        setWritingText(data.studentContent);
+        setSubmitCount(data.submitCnt);
+
+    }, []);
 
     const handleSubmit = () =>{
         const returnData = {

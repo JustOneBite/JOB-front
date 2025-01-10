@@ -44,7 +44,7 @@ export default function WritingController() {
         const fetchData = async () => {
             try {
 
-                const studentLessonId = "677fcc533e378bd9ea60afa1"
+                const studentLessonId = "677b977fe5c781a4dec77d34"
                 const resultStudentData = await readStudentLesson(studentLessonId)
 
                 setStudentContent(resultStudentData.studentData.content)
@@ -54,7 +54,7 @@ export default function WritingController() {
                 setLessonId(resultStudentData.lessonId)
                 setCurriculumId(resultStudentData.curriculumId)
 
-                const writingDataId = "67808eec1e3e336d7c41eba3"
+                const writingDataId = "6776c6c51dc045f5cf7530cb"
                 const resultWritingData = await getWritingData({id:writingDataId})
 
                 setTheme(resultWritingData.theme)
@@ -77,6 +77,10 @@ export default function WritingController() {
 
         if(isInitialUpdate)
         {
+
+            console.log(stageData, currentStageLevel,"11111")
+
+
             if(currentStageLevel === 0){
                 setComponentToRender(()=>StartPage)
             }else if(currentStageLevel === 1){
@@ -86,7 +90,6 @@ export default function WritingController() {
             }else if(currentStageLevel === 3){
                 setComponentToRender(()=>GrammarCheckPage) 
             }else if(currentStageLevel === 4){
-                console.log(stageData, "11111")
                 setComponentToRender(()=>TeacherFeedbackPage)
             }else if(currentStageLevel === 5){
                 setComponentToRender(()=>FinalSubmitPage)     
@@ -108,12 +111,10 @@ export default function WritingController() {
                 setStudentContent(updateData.content)
                 setSubmitCnt(submitCnt + 1)
 
-                console.log(updateData.content)
-
                 await checkGrammar(updateData.content)
             }
             else if(currentStageLevel === 3 || currentStageLevel === 4){
-                setStudentContent(updateData.studentContent)
+                setStudentContent(updateData.content)
                 setSubmitCnt(submitCnt + 1)
             }
             else if(currentStageLevel === 5){
