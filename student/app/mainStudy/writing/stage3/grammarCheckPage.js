@@ -1,18 +1,17 @@
 'use client'
+
+import { getWritingData, updateStudentContent, incSubmitCnt, readStudentLesson, writingValidator } from "../../../util/writingUtil"
 import { useEffect, useState } from "react"
 
-export default function GrammerCheck(data, onTestComplete) {
+export default function GrammerCheck({data, onComplete}) {
 
     const [writingText, setWritingText] = useState('') //학생이 작성하는 writing text 저장 (실시간 변경 가능능).
-    // const [writingInfo, setWritingInfo] = useState({ title: '', wordLimit: 0 })
     const [writingContent, setWritingContent] = useState('') //DB에 저장된 학생 writing content
     const [submitCount, setSubmitCount] = useState(0)
     const [grammerResult, setGrammerResult] = useState(null)
 
     const btnTitleArr = ['1차 문법 검사', '2차 문법 검사', '선생님 검사']
     const [btnTitle, setBtnTitle] = useState(btnTitleArr[0])
-
-    const [returnData, setReturnData] = useState({content: '', submitCnt: 0})
 
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -24,31 +23,20 @@ export default function GrammerCheck(data, onTestComplete) {
         const fetchData = async () => {
             try {
 
-                // const result = await getWritingData(data.curriculumId, data.lessonId)
-
-                // // 응답에서 받은 writingInfo 저장
-                // setWritingInfo({ title: result.theme, wordLimit: result.wordLimit})
-
                 // 학생이 작성한 writing content 불러오기
-                const studentLessonResponse = await readStudentLesson(data.studentId)
-
-                const tempStudentLessonResult = await studentLessonResponse.json()
-                const studentLessonResult = tempStudentLessonResult.result.studentData
-
-                alert(studentLessonResult.content)
+                const tempStudentLessonResult = await readStudentLesson(data.studentLessonId)
+                const studentLessonStudentDataResult = tempStudentLessonResult.studentData
                 
-                setWritingContent(studentLessonResult.content)
-                setWritingText(studentLessonResult.content)
-                setSubmitCount(studentLessonResult.submitCnt)
+                setWritingContent(studentLessonStudentDataResult.content)
+                setWritingText(studentLessonStudentDataResult.content)
+                setSubmitCount(studentLessonStudentDataResult.submitCnt)
 
-                //새로고침 시 grammar test가 1번 더 실행되는 것을 방지 
+                // 새로고침 시 grammar test가 1번 더 실행되는 것을 방지 
                 if (!hasRun) {
 
                     setHasRun(true); // 실행 여부를 기록
-
-                    console.log("문법 검사")
         
-                    const checkedGrammarResult = await writingValidator(studentLessonResult.content)
+                    const checkedGrammarResult = await writingValidator(studentLessonStudentDataResult.content)
         
                     // 문법 검사 결과 업데이트
                     setGrammerResult(checkedGrammarResult)
@@ -75,7 +63,8 @@ export default function GrammerCheck(data, onTestComplete) {
         }
 
         if(submitCount === 3){
-            return onTestComplete(returnData)
+            alert("문법 검사 끝!!!!")
+            return onComplete(returnData)
         }
         if (submitCount < btnTitleArr.length) {
             setBtnTitle(btnTitleArr[submitCount]);
@@ -97,56 +86,35 @@ export default function GrammerCheck(data, onTestComplete) {
     const handleClick = async () => {
         try {
 
-            setSubmitCount(count)
-
             const result = await updateStudentContent(data.studentLessonId, writingText)
             console.log('update 성공이다제!')
 
-            setWritingContent( result.studentdData.content ); // 응답에서 받은 writingInfo 저장
-            setWritingText(result.studentdData.content)
-            setSubmitCount(result.studentdData.submitCnt)
+            setWritingContent(result.studentData.content ); // 응답에서 받은 writingInfo 저장
+            setWritingText(result.studentData.content)
+            setSubmitCount(result.studentData.submitCnt)
+
+            const count = submitCount + 1
+            setSubmitCount(count)
 
         } catch (err) {
             setError(err.message); // 오류 발생 시 상태에 오류 메시지 저장
         }
     };
 
-    const grammerCheck = async () => {
-        try {
-
-            const grammarResult = await writingValidator(writingText)
-
-            // 문법 검사 결과 업데이트
-            setGrammerResult(grammarResult.grammarIssues);
-
-            console.log(submitCount)
-        } catch (err) {
-            setError(err.message)
-        }
-    }
-    
-    const incSubmitCnt = async () => {
-        try {
-
-            const incSumbitCntResult = await incSubmitCnt(data.studentLessonId)
-
-        }catch (err) {
-            setError(err.message)
-        }
-    }
-
     const handleSubmit = async (e) => {
         e.preventDefault() //새로 고침 방지
 
-        await grammerCheck() // 문법 체크 진행행
+        const grammarResult = await writingValidator(writingText)
+        // 문법 검사 결과 업데이트
+        setGrammerResult(grammarResult);
 
-        await incSubmitCnt() // submitCnt 1 증가가
+        await incSubmitCnt(data.studentLessonId) // submitCnt 1 증가가
 
         await handleClick() // content 수정 내용 저장장
     };
 
     const highlightText = (text, issues) => {
-        if (issues === null || issues.length === 0) {
+        if (issues === null || issues[0].context.text === "ALL PASS") {
             return text // 문법 오류가 없으면 원본 텍스트 반환
         }
     

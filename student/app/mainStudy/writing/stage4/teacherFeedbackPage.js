@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"; // useRouter 가져오기
 
-export default function TeacherCheckSubmit() {
+export default function TeacherCheckSubmit({data, onComplete}) {
 
     const [writingText, setWritingText] = useState('') //학생이 작성하는 writing text 저장 (실시간 변경 가능능).
-    const [writingInfo, setWritingInfo] = useState({ title: '', wordLimit: 0 })
     const [writingContent, setWritingContent] = useState('') //DB에 저장된 학생 writing content
     const [submitCount, setSubmitCount] = useState(0)
+    const [Error, setError] = useState('')
 
     const router = useRouter(); // useRouter 초기화
 
@@ -16,28 +16,6 @@ export default function TeacherCheckSubmit() {
         // 비동기 함수로 API 호출
         const fetchData = async () => {
             try {
-
-                const writingDataResponse = await fetch('http://localhost:8080/writingData/read', {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json',  // Content-Type을 JSON으로 설정
-                    },
-                    body: JSON.stringify({
-                        curriculumId: "64fd8570b1e2a4e334c8b33d",
-                        lessonId: "64fd8570b1e2a4e334c8b33e"
-                    }),
-                    credentials: 'include'  // 쿠키를 포함하려면 이 설정 추가
-                })
-
-                if (!writingDataResponse.ok) {
-                    throw new Error('Network response was not ok')
-                }
-
-                const tempWritingDataResult = await writingDataResponse.json();
-                const writingDataResult = tempWritingDataResult.result
-
-                // 응답에서 받은 writingInfo 저장
-                setWritingInfo({ title: writingDataResult.theme, wordLimit: writingDataResult.wordLimit})
 
                 // 학생이 작성한 writing content 불러오기
                 const studentLessonResponse = await fetch('http://localhost:8080/studentLesson/read', {
@@ -47,7 +25,7 @@ export default function TeacherCheckSubmit() {
                     },
                     body: JSON.stringify({
                             searchType: 1,
-                            id: "67794cc250b5dfb6b7122316",
+                            id: data.studentLessonId,
                     }),
                     credentials: 'include'  // 쿠키를 포함하려면 이 설정 추가
                 })
@@ -71,7 +49,11 @@ export default function TeacherCheckSubmit() {
     }, [])
 
     const handleSubmit = () =>{
-        router.push('./finalSubmit')
+        const returnData = {
+            content: writingText,
+            submitCnt: submitCount
+        }
+        return onComplete   (returnData)
     }
 
     const handleChange = (e) => {
@@ -85,16 +67,16 @@ export default function TeacherCheckSubmit() {
 
     return (
         <div>
-            <h4>{writingInfo.title}</h4>
+            <h4>{data.writingInfo.theme}</h4>
             <form onSubmit={handleSubmit}>
                 <textarea
                     name="content"
                     value={writingText}
                     onChange={handleChange}
-                    maxLength={writingInfo.wordLimit}
+                    maxLength={data.writingInfo.wordLimit}
                     placeholder="글을 작성하세요"
                 />
-                <p>남은 글자수 {writingInfo.wordLimit - countWords(writingText)}</p>
+                <p>남은 글자수 {data.writingInfo.wordLimit - countWords(writingText)}</p>
                 <button type="submit" disabled={countWords(writingText) === 0}>최종 제출</button> 
             </form>
         </div>

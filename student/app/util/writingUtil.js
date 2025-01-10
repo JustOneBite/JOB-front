@@ -1,7 +1,7 @@
 
 
 
-export async function getWritingData(curriculumId, lessonId) {
+export async function getWritingData(id) {
     try {
         const response = await fetch('http://localhost:8080/writingData/read', {
             method: "POST",
@@ -9,8 +9,7 @@ export async function getWritingData(curriculumId, lessonId) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                curriculumId: curriculumId,
-                lessonId: lessonId
+                id: id.id
             }),
             credentials: 'include',
         });
@@ -57,6 +56,8 @@ export async function updateStudentContent(id,studentContent){
 
         const res = await response.json()
         console.log(res.result)
+
+        return res.result
     }
     catch(e){
         throw new Error("컨텐츠 업데이트 중 문제 발생");
@@ -129,7 +130,7 @@ export async function writingValidator(studentContent){
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                content: content,
+                content: studentContent,
             }),
             credentials: "include",
         });
@@ -141,7 +142,7 @@ export async function writingValidator(studentContent){
         }
 
         const temp_result = await response.json();
-        const result = temp_result.result
+        const result = temp_result.grammarIssues
 
         return result;
 
@@ -149,3 +150,66 @@ export async function writingValidator(studentContent){
         throw new Error("문법 검사 중 오류 발생")
     }
 }
+
+
+export async function getCurriculumName(curriculumId){
+    try{
+    
+        const response = await fetch("http://localhost:8080/curriculum/get", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                _id: curriculumId,
+            }),
+            credentials: "include",
+        });
+
+        if (!response.ok) {
+            const er = await response.json()
+            console.log(er.message)
+            throw new Error(`HTTP error! status: ${response.status} message :  ${er.message}`);
+        }
+
+        const temp_result = await response.json();
+        const result = temp_result[0].name
+
+        return result;
+
+    }catch(error){
+        throw new Error("커리큘럼 이름 조회 중 오류 발생")
+    }
+}
+
+export async function getLessonNum(lessonId){
+    try{
+    
+        const response = await fetch("http://localhost:8080/lesson/get", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                _id: lessonId,
+            }),
+            credentials: "include",
+        });
+
+        if (!response.ok) {
+            const er = await response.json()
+            console.log(er.message)
+            throw new Error(`HTTP error! status: ${response.status} message :  ${er.message}`);
+        }
+
+        const temp_result = await response.json();
+        const result = temp_result[0].lessonNumber
+
+        return result;
+
+    }catch(error){
+        throw new Error("유닛 번호 조회 중 오류 발생")
+    }
+}
+
+

@@ -3,14 +3,34 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"; // useRouter 가져오기
 
-export default function Reference() {
+export default function Reference({data, onComplete}) {
 
-    const router = useRouter(); // useRouter 초기화
+    useEffect(() => {
+        console.log(data)
+    },[])
+
+    const handleSubmit = (e) => {
+        const updateData = null
+        e.preventDefault()
+        onComplete(updateData)
+    }
 
     return (
         <div>
+
+            <h2>레퍼런스 페이지</h2>
+            {
+                data.reference.length != 0 ?
+                data.reference.map((refer,idx)=>{
+                    return(
+                        <div key={idx}>[{idx+1}] {refer}</div>
+                    )
+                })
+                :
+                <div>데이터가 없어요</div>
+            }
             <button
-                onClick={() => router.push('./writingStart')} // 클릭 시 /reference로 이동
+                onClick={handleSubmit} 
                 style={{
                     marginTop: "20px",
                     padding: "10px 20px",
@@ -21,7 +41,7 @@ export default function Reference() {
                     cursor: "pointer",
                 }}
             >
-                문법 학습하기
+                글쓰러 가기
             </button>
         </div>
     )

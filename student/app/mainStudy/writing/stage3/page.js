@@ -1,9 +1,12 @@
 'use Client'
 
-export default function Stage0(){
+
+export default function Stage3(data){
+    
+
     return (
         <div>
-            <p>Hello world!</p>
+            여긴 왜온겨
         </div>
     )
 }
