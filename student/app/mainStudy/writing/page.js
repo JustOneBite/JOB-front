@@ -23,10 +23,9 @@ export default function WritingController() {
     const [allocatedDate, setAllocatedDate] = useState(null)
     const [lessonId, setLessonId] = useState(null)
     const [curriculumId, setCurriculumId] = useState(null)
+    const [validateResult, setValidateResult] = useState([])
 
     const [stageData,setStageData] = useState(null)
-    const [isStageDataReady, setIsStageDataReady] = useState(true)
-    const [isCurrentStageReady, setIsCurrentStageReady] = useState(true)
     const [isInitialUpdate,setIsInitialUpdate] = useState(false)
     
 
@@ -45,7 +44,7 @@ export default function WritingController() {
         const fetchData = async () => {
             try {
 
-                const studentLessonId = "677b977fe5c781a4dec77d34"
+                const studentLessonId = "677fcc533e378bd9ea60afa1"
                 const resultStudentData = await readStudentLesson(studentLessonId)
 
                 setStudentContent(resultStudentData.studentData.content)
@@ -55,7 +54,7 @@ export default function WritingController() {
                 setLessonId(resultStudentData.lessonId)
                 setCurriculumId(resultStudentData.curriculumId)
 
-                const writingDataId = "6776c6c51dc045f5cf7530cb"
+                const writingDataId = "67808eec1e3e336d7c41eba3"
                 const resultWritingData = await getWritingData({id:writingDataId})
 
                 setTheme(resultWritingData.theme)
@@ -76,7 +75,7 @@ export default function WritingController() {
     useEffect(() => {
         handleSettingData()
 
-        if(isCurrentStageReady && isStageDataReady && isInitialUpdate)
+        if(isInitialUpdate)
         {
             if(currentStageLevel === 0){
                 setComponentToRender(()=>StartPage)
@@ -87,86 +86,108 @@ export default function WritingController() {
             }else if(currentStageLevel === 3){
                 setComponentToRender(()=>GrammarCheckPage) 
             }else if(currentStageLevel === 4){
+                console.log(stageData, "11111")
                 setComponentToRender(()=>TeacherFeedbackPage)
             }else if(currentStageLevel === 5){
                 setComponentToRender(()=>FinalSubmitPage)     
             }
-            
-            setIsCurrentStageReady(false)
-            setIsStageDataReady(false)
         }
         
 
-    }, [currentStageLevel, isStageDataReady, isCurrentStageReady,isInitialUpdate])
+    }, [currentStageLevel, isInitialUpdate])
 
-    const handleCurrentStage = (updateData) => {
+    const checkGrammar = async (contentData) => {
+        const result = await writingValidator(contentData)
+        setValidateResult(result)
+    }
 
-        if(currentStageLevel === 2){
-            setStudentContent(updateData.content)
+    const handleCurrentStage = async (updateData) => {
+
+        const updatingData = async (updateData) => {
+            if(currentStageLevel === 2){
+                setStudentContent(updateData.content)
+                setSubmitCnt(submitCnt + 1)
+
+                console.log(updateData.content)
+
+                await checkGrammar(updateData.content)
+            }
+            else if(currentStageLevel === 3 || currentStageLevel === 4){
+                setStudentContent(updateData.studentContent)
+                setSubmitCnt(submitCnt + 1)
+            }
+            else if(currentStageLevel === 5){
+                setStudentContent(updateData.studentContent)
+                setSubmitCnt(submitCnt + 1)
+            }
+
+            setCurrentStageLevel(currentStageLevel + 1)
         }
+
+        await updatingData(updateData)
         
-        if(currentStageLevel === 3){
-            
-        }
-        
-        setCurrentStageLevel(currentStageLevel + 1)
-        setIsCurrentStageReady(true)
     };
 
-    const handleSettingData = () => {
+    const handleSettingData = async () => {
 
-        let updateData = null
+        const setUpdatingData = async () => {
+            let updateData = null
 
-        if (currentStageLevel === 0) { // 비교 연산자를 엄격하게 사용
-            updateData = {
-                curriculumId: curriculumId,
-                lessonId: lessonId,
-                allocatedDate: allocatedDate,
-            };
-        }
-        else if(currentStageLevel === 1) {
-            updateData = {
-                reference : reference
-            };
-        }
-        else if(currentStageLevel === 2) {
-            updateData = {
-                content :  studentContent,
-                wordLimit : wordLimit,
-                theme : theme,
-                reference : reference,
-            };
-        }
-        else if(currentStageLevel === 3) {
-            updateData = {
-                studentContent: studentContent,
-                submitCnt: submitCnt,
-                studentLessonId: "677fcc533e378bd9ea60afa1",
-                writingInfo: {
-                    theme: theme,
-                    wordLimit: wordLimit
+            if (currentStageLevel === 0) { // 비교 연산자를 엄격하게 사용
+                updateData = {
+                    curriculumId: curriculumId,
+                    lessonId: lessonId,
+                    allocatedDate: allocatedDate,
+                };
+            }
+            else if(currentStageLevel === 1) {
+                updateData = {
+                    reference : reference
+                };
+            }
+            else if(currentStageLevel === 2) {
+                updateData = {
+                    content :  studentContent,
+                    wordLimit : wordLimit,
+                    theme : theme,
+                    reference : reference,
+                };
+            }
+            else if(currentStageLevel === 3) {
+                updateData = {
+                    studentContent: studentContent,
+                    writingInfo: {
+                        theme: theme,
+                        wordLimit: wordLimit
+                    },
+                    grammarResult: validateResult
+                };
+            }
+            else if(currentStageLevel === 4) {
+                updateData = {
+                    studentContent: studentContent,
+                    writingInfo: {
+                        theme: theme,
+                        wordLimit: wordLimit
+                    }
+                };
+            }
+            else if(currentStageLevel === 5) {
+    
+                updateData = {
+                    studentContent: studentContent,
+                    writingInfo: {
+                        theme: theme,
+                        wordLimit: wordLimit
+                    }
                 }
-            };
-        }
-        else if(currentStageLevel === 4) {
+            }
 
-            updateData = {
-                studentContent: studentContent,
-                submitCnt: submitCnt,
-                studentLessonId: "677fcc533e378bd9ea60afa1",
-                writingInfo: {
-                    theme: theme,
-                    wordLimit: wordLimit
-                }
-            };
+            setStageData(updateData);
         }
 
-        console.log(updateData)
-
-        setStageData(updateData);
-
-        setIsStageDataReady(true)
-    };
+        await setUpdatingData()
+    }
 
     // type, lesson num, date는 이전 페이지에서 불러옴.
     return (

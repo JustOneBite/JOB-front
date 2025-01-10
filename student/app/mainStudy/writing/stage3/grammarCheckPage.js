@@ -1,6 +1,6 @@
 'use client'
 
-import { getWritingData, updateStudentContent, incSubmitCnt, readStudentLesson, writingValidator } from "../../../util/writingUtil"
+import { writingValidator } from "../../../util/writingUtil"
 import { useEffect, useState } from "react"
 
 export default function GrammerCheck({data, onComplete}) {
@@ -8,45 +8,21 @@ export default function GrammerCheck({data, onComplete}) {
     const [writingText, setWritingText] = useState('') //학생이 작성하는 writing text 저장 (실시간 변경 가능능).
     const [writingContent, setWritingContent] = useState('') //DB에 저장된 학생 writing content
     const [submitCount, setSubmitCount] = useState(0)
-    const [grammerResult, setGrammerResult] = useState(null)
-
-    const btnTitleArr = ['1차 문법 검사', '2차 문법 검사', '선생님 검사']
-    const [btnTitle, setBtnTitle] = useState(btnTitleArr[0])
 
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
-
-    const [hasRun, setHasRun] = useState(false); // 새로고침 시 useEffect 재로드 방지용
+    const [errorMessage, setErrorMessage] = useState('')
+    const [grammarResult, setGrammarResult] = useState([])
 
     useEffect(() => {
         // 비동기 함수로 API 호출
         const fetchData = async () => {
             try {
-
-                // 학생이 작성한 writing content 불러오기
-                const tempStudentLessonResult = await readStudentLesson(data.studentLessonId)
-                const studentLessonStudentDataResult = tempStudentLessonResult.studentData
-                
-                setWritingContent(studentLessonStudentDataResult.content)
-                setWritingText(studentLessonStudentDataResult.content)
-                setSubmitCount(studentLessonStudentDataResult.submitCnt)
-
-                // 새로고침 시 grammar test가 1번 더 실행되는 것을 방지 
-                if (!hasRun) {
-
-                    setHasRun(true); // 실행 여부를 기록
-        
-                    const checkedGrammarResult = await writingValidator(studentLessonStudentDataResult.content)
-        
-                    // 문법 검사 결과 업데이트
-                    setGrammerResult(checkedGrammarResult)
-
-                }
-
-
-
+                setGrammarResult(data.grammarResult)
+                setWritingContent(data.studentContent)
+                setWritingText(data.studentContent)
+                setSubmitCount(data.submitCnt)
             } catch (err) {
-                setError(err.message); // 오류 발생 시 상태에 오류 메시지 저장
+                setErrorMessage(err.message); // 오류 발생 시 상태에 오류 메시지 저장
             } finally {
                 setLoading(false); // 로딩 상태 변경
             }
@@ -55,27 +31,11 @@ export default function GrammerCheck({data, onComplete}) {
         fetchData();
     }, []);
 
-    useEffect(() => {
-
-        const returnData = {
-            content: writingText,
-            submitCnt: submitCount
-        }
-
-        if(submitCount === 3){
-            alert("문법 검사 끝!!!!")
-            return onComplete(returnData)
-        }
-        if (submitCount < btnTitleArr.length) {
-            setBtnTitle(btnTitleArr[submitCount]);
-        }
-    }, [submitCount]); // submitCount가 변경될 때 실행
-
     if (loading) return <div>Loading...</div>; // 로딩 중일 때 
-    if (error) return <div>Error: {error}</div>; // 오류 발생 시
+    if (errorMessage) return <div>Error: {errorMessage}</div>; // 오류 발생 시
 
     const countWords = (text) => {
-        return text.length;
+        return text.length
     };
 
     const handleChange = (e) => {
@@ -86,31 +46,27 @@ export default function GrammerCheck({data, onComplete}) {
     const handleClick = async () => {
         try {
 
-            const result = await updateStudentContent(data.studentLessonId, writingText)
-            console.log('update 성공이다제!')
-
-            setWritingContent(result.studentData.content ); // 응답에서 받은 writingInfo 저장
-            setWritingText(result.studentData.content)
-            setSubmitCount(result.studentData.submitCnt)
-
-            const count = submitCount + 1
-            setSubmitCount(count)
+            setWritingContent(writingText); // 응답에서 받은 writingInfo 저장
+            setWritingText(writingText)
+            setSubmitCount(submitCount + 1)
 
         } catch (err) {
-            setError(err.message); // 오류 발생 시 상태에 오류 메시지 저장
+            errorMessage(err.message); // 오류 발생 시 상태에 오류 메시지 저장
         }
-    };
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault() //새로 고침 방지
 
-        const grammarResult = await writingValidator(writingText)
-        // 문법 검사 결과 업데이트
-        setGrammerResult(grammarResult);
+        await handleClick() // content 수정 내용 저장
 
-        await incSubmitCnt(data.studentLessonId) // submitCnt 1 증가가
+        const returnData = {
+            content: writingText,
+        }
 
-        await handleClick() // content 수정 내용 저장장
+        console.log(returnData, "return Data")
+
+        return onComplete(returnData)
     };
 
     const highlightText = (text, issues) => {
@@ -158,12 +114,12 @@ export default function GrammerCheck({data, onComplete}) {
                     placeholder="글을 작성하세요"
                 />
                 <p>남은 글자수 {data.writingInfo.wordLimit - countWords(writingText)}</p>
-                <button type="submit" disabled={countWords(writingText) === 0}>{btnTitle}</button>
+                <button type="submit" disabled={countWords(writingText) === 0}>선생님 검사</button>
             </form>
-            {grammerResult && (
+            {grammarResult && (
                 <div>
                     <h2>Grammar Issues:</h2>
-                    {grammerResult.map((issue, index) => (
+                    {grammarResult.map((issue, index) => (
                         <div key={index}>
                             <p>{issue.message}</p>
                             <p>Context: {issue.context.text}</p>
@@ -174,8 +130,10 @@ export default function GrammerCheck({data, onComplete}) {
             <div
                 style={{ border: '1px solid #ccc', padding: '10px', minHeight: '100px' }}
             >
-                {highlightText(writingContent, grammerResult)}
+                {highlightText(writingContent, grammarResult)}
             </div>
+
+            <div>{errorMessage}</div>
         </div>
     )
 }
