@@ -72,6 +72,7 @@ export default function WritingController() {
     useEffect(() => {
 
         if(currentStageLevel === 0){
+            // data 받아오는 함수 만들고고
             setComponentToRender(()=>StartPage)
         }else if(currentStageLevel === 1){
             setComponentToRender(()=>ReferencePage)
@@ -91,30 +92,30 @@ export default function WritingController() {
         setStudentContent(updateData.content)
         setSubmitCnt(updateData+1)
         setCurrentStageLevel(currentStageLevel + 1)
-    };
+    }
 
     const handletSendingData = () => {
-        const stageData = [stageOneData, stageTwoData, stageTwoData, stageThreeData, stageFourData, stageFiveData];
+        const stageData = [stageOneData, stageTwoData, stageTwoData, stageThreeData, stageFourData, stageFiveData]
         return stageData[currentStageLevel] || null; // 안전한 반환
     }
 
     // type, lesson num, date는 이전 페이지에서 불러옴.
     return (
         <div>
-        {
-                ComponentToRender ? (
-                    <ComponentToRender
-                    data = { handletSendingData() }
-                    onTestComplete={(updateData) => handleCurrentStage(updateData)}
-                    />
-                ) : (
-                    <div>Loading...</div> // 로딩 상태 표시
-                )
-        }
+            {
+                    ComponentToRender ? (
+                        <ComponentToRender
+                        data = { handletSendingData() }
+                        onTestComplete={(updateData) => handleCurrentStage(updateData)}
+                        />
+                    ) : (
+                        <div>Loading...</div> // 로딩 상태 표시
+                    )
+            }
 
-        <div>
-            {studentContent}, {teacherFeedback},{submitCnt},{theme},{wordLimit},{reference}
-        </div>
+                <div>
+                    {studentContent}, {teacherFeedback},{submitCnt},{theme},{wordLimit},{reference}
+                </div>
         </div>
     )
 }

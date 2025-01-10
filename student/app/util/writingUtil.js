@@ -1,14 +1,17 @@
 
 
 
-export async function getWritingData(requestBody) {
+export async function getWritingData(curriculumId, lessonId) {
     try {
         const response = await fetch('http://localhost:8080/writingData/read', {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(requestBody),
+            body: JSON.stringify({
+                curriculumId: curriculumId,
+                lessonId: lessonId
+            }),
             credentials: 'include',
         });
 

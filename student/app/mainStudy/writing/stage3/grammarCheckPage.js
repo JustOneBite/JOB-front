@@ -1,11 +1,10 @@
 'use client'
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"; // useRouter 가져오기
 
-export default function GrammerCheck() {
+export default function GrammerCheck(data, onTestComplete) {
 
     const [writingText, setWritingText] = useState('') //학생이 작성하는 writing text 저장 (실시간 변경 가능능).
-    const [writingInfo, setWritingInfo] = useState({ title: '', wordLimit: 0 })
+    // const [writingInfo, setWritingInfo] = useState({ title: '', wordLimit: 0 })
     const [writingContent, setWritingContent] = useState('') //DB에 저장된 학생 writing content
     const [submitCount, setSubmitCount] = useState(0)
     const [grammerResult, setGrammerResult] = useState(null)
@@ -13,51 +12,25 @@ export default function GrammerCheck() {
     const btnTitleArr = ['1차 문법 검사', '2차 문법 검사', '선생님 검사']
     const [btnTitle, setBtnTitle] = useState(btnTitleArr[0])
 
+    const [returnData, setReturnData] = useState({content: '', submitCnt: 0})
+
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
     const [hasRun, setHasRun] = useState(false); // 새로고침 시 useEffect 재로드 방지용
-    const router = useRouter(); // useRouter 초기화
 
     useEffect(() => {
         // 비동기 함수로 API 호출
         const fetchData = async () => {
             try {
 
-                const writingDataResponse = await fetch('http://localhost:8080/writingData/read', {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json',  // Content-Type을 JSON으로 설정
-                    },
-                    body: JSON.stringify({
-                        curriculumId: "64fd8570b1e2a4e334c8b33d",
-                        lessonId: "64fd8570b1e2a4e334c8b33e"
-                    }),
-                    credentials: 'include'  // 쿠키를 포함하려면 이 설정 추가
-                })
+                // const result = await getWritingData(data.curriculumId, data.lessonId)
 
-                if (!writingDataResponse.ok) {
-                    throw new Error('Network response was not ok')
-                }
-
-                const tempWritingDataResult = await writingDataResponse.json();
-                const writingDataResult = tempWritingDataResult.result
-
-                // 응답에서 받은 writingInfo 저장
-                setWritingInfo({ title: writingDataResult.theme, wordLimit: writingDataResult.wordLimit})
+                // // 응답에서 받은 writingInfo 저장
+                // setWritingInfo({ title: result.theme, wordLimit: result.wordLimit})
 
                 // 학생이 작성한 writing content 불러오기
-                const studentLessonResponse = await fetch('http://localhost:8080/studentLesson/read', {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json',  // Content-Type을 JSON으로 설정
-                    },
-                    body: JSON.stringify({
-                            searchType: 1,
-                            id: "67794cc250b5dfb6b7122316",
-                    }),
-                    credentials: 'include'  // 쿠키를 포함하려면 이 설정 추가
-                })
+                const studentLessonResponse = await readStudentLesson(data.studentId)
 
                 const tempStudentLessonResult = await studentLessonResponse.json()
                 const studentLessonResult = tempStudentLessonResult.result.studentData
@@ -74,27 +47,11 @@ export default function GrammerCheck() {
                     setHasRun(true); // 실행 여부를 기록
 
                     console.log("문법 검사")
-                    
-                    //처음 페이지 라우트 되었을 때 grammar test 실행
-                    const grammarResponse = await fetch("http://localhost:8080/validator/writing", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            content: studentLessonResult.content,
-                        }),
-                        credentials: "include",
-                    });
         
-                    if (!grammarResponse.ok) {
-                        throw new Error("Failed to check grammar.");
-                    }
-        
-                    const checkedGrammarResult = await grammarResponse.json();
+                    const checkedGrammarResult = await writingValidator(studentLessonResult.content)
         
                     // 문법 검사 결과 업데이트
-                    setGrammerResult(checkedGrammarResult.grammarIssues);
+                    setGrammerResult(checkedGrammarResult)
 
                 }
 
@@ -111,8 +68,14 @@ export default function GrammerCheck() {
     }, []);
 
     useEffect(() => {
+
+        const returnData = {
+            content: writingText,
+            submitCnt: submitCount
+        }
+
         if(submitCount === 3){
-            return router.push("./teacherCheckSubmit")
+            return onTestComplete(returnData)
         }
         if (submitCount < btnTitleArr.length) {
             setBtnTitle(btnTitleArr[submitCount]);
@@ -134,40 +97,14 @@ export default function GrammerCheck() {
     const handleClick = async () => {
         try {
 
-            let count = submitCount + 1
-
             setSubmitCount(count)
 
-            const response = await fetch('http://localhost:8080/studentLesson/update', {
-                method: "PATCH",
-                headers: {
-                    'Content-Type': 'application/json',  // Content-Type을 JSON으로 설정
-                },
-                body: JSON.stringify({
-                    curriculumId: "64fd8570b1e2a4e334c8b33d",
-                    lessonId: "64fd8570b1e2a4e334c8b33e",
-                    theme: writingInfo.title,
-                    wordLimit: writingInfo.wordLimit,
-                    content: writingText,
-                    submitCnt: count,
-                }),
-                credentials: 'include'  // 쿠키를 포함하려면 이 설정 추가
-            });
-
-            if (!response.ok) { 
-                console.log("22222")
-                throw new Error('Network response was not ok');
-            }
-
-            let temp_result = await response.json();
+            const result = await updateStudentContent(data.studentLessonId, writingText)
             console.log('update 성공이다제!')
-            const result = temp_result.result
 
-            // console.log("result : ", result)
-            // console.log("result : ", result.data)
-
-            setWritingInfo({ title: result.theme, wordLimit: result.wordLimit, content: result.content }); // 응답에서 받은 writingInfo 저장
-            setSubmitCount(result.submitCnt) 
+            setWritingContent( result.studentdData.content ); // 응답에서 받은 writingInfo 저장
+            setWritingText(result.studentdData.content)
+            setSubmitCount(result.studentdData.submitCnt)
 
         } catch (err) {
             setError(err.message); // 오류 발생 시 상태에 오류 메시지 저장
@@ -177,25 +114,10 @@ export default function GrammerCheck() {
     const grammerCheck = async () => {
         try {
 
-            const grammarResponse = await fetch("http://localhost:8080/validator/writing", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    content: writingText,
-                }),
-                credentials: "include",
-            });
-
-            if (!grammarResponse.ok) {
-                throw new Error("Failed to check grammar.");
-            }
-
-            const checkedGrammarResult = await grammarResponse.json();
+            const grammarResult = await writingValidator(writingText)
 
             // 문법 검사 결과 업데이트
-            setGrammerResult(checkedGrammarResult.grammarIssues);
+            setGrammerResult(grammarResult.grammarIssues);
 
             console.log(submitCount)
         } catch (err) {
@@ -206,22 +128,9 @@ export default function GrammerCheck() {
     const incSubmitCnt = async () => {
         try {
 
-            const incSumbitCntResponse = await fetch("http://localhost:8080/studentLesson/IncSubmitCnt", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    id: "67794cc250b5dfb6b7122316",
-                }),
-                credentials: "include",
-            });
+            const incSumbitCntResult = await incSubmitCnt(data.studentLessonId)
 
-            if (!incSumbitCntResponse.ok) {
-                throw new Error("Failed to increase submitCnt.");
-            }
-
-        } catch (err) {
+        }catch (err) {
             setError(err.message)
         }
     }
@@ -271,16 +180,16 @@ export default function GrammerCheck() {
 
     return (
         <div className="p-20">
-            <h4>{writingInfo.title}</h4>
+            <h4>{data.writingInfo.theme}</h4>
             <form onSubmit={handleSubmit}>
                 <textarea
                     name="content"
                     value={writingText}
                     onChange={handleChange}
-                    maxLength={writingInfo.wordLimit}
+                    maxLength={data.writingInfo.wordLimit}
                     placeholder="글을 작성하세요"
                 />
-                <p>남은 글자수 {writingInfo.wordLimit - countWords(writingText)}</p>
+                <p>남은 글자수 {data.writingInfo.wordLimit - countWords(writingText)}</p>
                 <button type="submit" disabled={countWords(writingText) === 0}>{btnTitle}</button>
             </form>
             {grammerResult && (
