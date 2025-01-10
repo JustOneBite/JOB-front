@@ -31,7 +31,7 @@ export default function WritingController() {
     
 
 
-    const [currentStageLevel, setCurrentStageLevel] = useState(3)
+    const [currentStageLevel, setCurrentStageLevel] = useState(0)
     const [ComponentToRender, setComponentToRender] = useState(null)
 
     const [loading, setLoading] = useState(true)
@@ -45,7 +45,7 @@ export default function WritingController() {
         const fetchData = async () => {
             try {
 
-                const studentLessonId = "677fcc533e378bd9ea60afa1"
+                const studentLessonId = "677b977fe5c781a4dec77d34"
                 const resultStudentData = await readStudentLesson(studentLessonId)
 
                 setStudentContent(resultStudentData.studentData.content)
@@ -55,7 +55,7 @@ export default function WritingController() {
                 setLessonId(resultStudentData.lessonId)
                 setCurriculumId(resultStudentData.curriculumId)
 
-                const writingDataId = "67808eec1e3e336d7c41eba3"
+                const writingDataId = "6776c6c51dc045f5cf7530cb"
                 const resultWritingData = await getWritingData({id:writingDataId})
 
                 setTheme(resultWritingData.theme)
@@ -101,9 +101,9 @@ export default function WritingController() {
 
     const handleCurrentStage = (updateData) => {
 
-        // if(currentStageLevel === 1){
-        // 추가하기
-        // }
+        if(currentStageLevel === 2){
+            setStudentContent(updateData.content)
+        }
         
         if(currentStageLevel === 3){
             
@@ -118,18 +118,23 @@ export default function WritingController() {
         let updateData = null
 
         if (currentStageLevel === 0) { // 비교 연산자를 엄격하게 사용
-            
             updateData = {
                 curriculumId: curriculumId,
                 lessonId: lessonId,
                 allocatedDate: allocatedDate,
             };
-    
         }
         else if(currentStageLevel === 1) {
-            console.log(reference)
             updateData = {
                 reference : reference
+            };
+        }
+        else if(currentStageLevel === 2) {
+            updateData = {
+                content :  studentContent,
+                wordLimit : wordLimit,
+                theme : theme,
+                reference : reference,
             };
         }
         else if(currentStageLevel === 3) {
@@ -166,6 +171,7 @@ export default function WritingController() {
     // type, lesson num, date는 이전 페이지에서 불러옴.
     return (
         <div>
+
         {
                 ComponentToRender ? (
                     <ComponentToRender
@@ -176,6 +182,7 @@ export default function WritingController() {
                     <div>Loading...</div> // 로딩 상태 표시
                 )
         }
+
 
         {/* <div>
             {studentContent}, {teacherFeedback},{allocatedDate},{submitCnt},{theme},{wordLimit},{reference}

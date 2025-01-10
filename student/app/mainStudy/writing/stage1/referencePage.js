@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"; // useRouter 가져오기
 
 export default function Reference({data, onComplete}) {
 
