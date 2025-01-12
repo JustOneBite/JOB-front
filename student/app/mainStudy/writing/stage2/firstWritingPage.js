@@ -18,6 +18,17 @@ export default function WritingStart({data, onComplete}) {
 
     }, []);
 
+    useEffect(() => {
+            const handleBeforeUnload = (event) => {
+              event.preventDefault()
+              event.returnValue = ""
+            }
+        
+            return () => {
+                window.removeEventListener("beforeunload", handleBeforeUnload)
+            }
+          }, []) // 뒤로가기, 창 닫기, 새로고침 클릭 시 데이터 유실 경고 메시지 표출
+
     const handleChange = (e) => {
         setContent(e.target.value);
     }

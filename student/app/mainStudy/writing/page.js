@@ -8,27 +8,27 @@ import FirstWritingPage from "./stage2/firstWritingPage"
 import GrammarCheckPage from "./stage3/grammarCheckPage"
 import TeacherFeedbackPage from "./stage4/teacherFeedbackPage"
 import FinalSubmitPage from "./stage5/finalSubmitPage"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { useRouter } from "next/navigation"; // useRouter 가져오기 
 
 export default function WritingController() {
 
-    const [stageLevel, setStageLevel] = useState(0) // 0 - writingMainPage 1 - referencePage 2 - firstWriting 3 - grammarCheck 4 - teacherFeedback 5 - finalSubmit
+    // 모든 상태 변수 useRef로 변경
+    const teacherFeedbackRef = useRef([])
+    const submitCntRef = useRef(0)
+    const themeRef = useRef('')
+    const wordLimitRef = useRef('')
+    const referenceRef = useRef([])
+    const allocatedDateRef = useRef(null)
+    const lessonIdRef = useRef(null)
+    const curriculumIdRef = useRef(null)
+    const validateResultRef = useRef([])
 
-    const [studentContent, setStudentContent] = useState('')
-    const [teacherFeedback, setTeacherFeedback] = useState([])
-    const [submitCnt, setSubmitCnt] = useState(0)
-    const [theme, setTheme] = useState('')
-    const [wordLimit, setWordLimit] = useState('')
-    const [reference, setReference] = useState([])
-    const [allocatedDate, setAllocatedDate] = useState(null)
-    const [lessonId, setLessonId] = useState(null)
-    const [curriculumId, setCurriculumId] = useState(null)
-    const [validateResult, setValidateResult] = useState([])
+    const studentContentRef = useRef('') // studentContent를 useRef로 변경
 
-    const [stageData,setStageData] = useState(null)
-    const [isInitialUpdate,setIsInitialUpdate] = useState(false)
-    
-
+    const stageData = useRef(null)
+    // const [stageData, setStageData] = useState(null)
+    const [isInitialUpdate, setIsInitialUpdate] = useState(false)
 
     const [currentStageLevel, setCurrentStageLevel] = useState(0)
     const [ComponentToRender, setComponentToRender] = useState(null)
@@ -36,179 +36,203 @@ export default function WritingController() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
-    // studentContent, teacherFeedback, submitCnt // theme, wordLimit, reference
+    const router = useRouter(); // useRouter 초기화
+
+    useEffect(() => {
+        const handleBeforeUnload = (event) => {
+          event.preventDefault()
+          event.returnValue = ""
+        }
+
+        window.addEventListener("beforeunload", handleBeforeUnload)
+    
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload)
+        }
+      }, []) // 뒤로가기, 창 닫기, 새로고침 클릭 시 데이터 유실 경고 메시지 표출
 
     // 학생에게 배정된 curriculum 정보 요청
     useEffect(() => {
-        // 비동기 함수로 API 호출
         const fetchData = async () => {
             try {
-
-                const studentLessonId = "677b977fe5c781a4dec77d34"
+                const studentLessonId = "677fcc533e378bd9ea60afa1"
                 const resultStudentData = await readStudentLesson(studentLessonId)
 
-                setStudentContent(resultStudentData.studentData.content)
-                setTeacherFeedback(resultStudentData.studentData.teacherFeedback)
-                setSubmitCnt(resultStudentData.studentData.submitCnt)
-                setAllocatedDate(resultStudentData.allocatedDate)
-                setLessonId(resultStudentData.lessonId)
-                setCurriculumId(resultStudentData.curriculumId)
+                studentContentRef.current = resultStudentData.studentData.content
+                teacherFeedbackRef.current = resultStudentData.studentData.teacherFeedback
+                submitCntRef.current = resultStudentData.studentData.submitCnt
+                allocatedDateRef.current = resultStudentData.allocatedDate
+                lessonIdRef.current = resultStudentData.lessonId
+                curriculumIdRef.current = resultStudentData.curriculumId
+                setCurrentStageLevel(submitCntRef.current)
 
-                const writingDataId = "6776c6c51dc045f5cf7530cb"
-                const resultWritingData = await getWritingData({id:writingDataId})
+                if(submitCntRef.current === 3){
+                    await checkGrammar(resultStudentData.studentData.content)
+                }
 
-                setTheme(resultWritingData.theme)
-                setWordLimit(resultWritingData.wordLimit)
-                setReference(resultWritingData.references);
+                const writingDataId = "67808eec1e3e336d7c41eba3"
+                const resultWritingData = await getWritingData({ id: writingDataId })
+
+                themeRef.current = resultWritingData.theme
+                wordLimitRef.current = resultWritingData.wordLimit
+                referenceRef.current = resultWritingData.references
 
             } catch (err) {
-                setError(err.message); // 오류 발생 시 상태에 오류 메시지 저장
+                setError(err.message) // 오류 발생 시 상태에 오류 메시지 저장
             } finally {
                 setIsInitialUpdate(true)
-                setLoading(false); // 로딩 상태 변경
+                setLoading(false) // 로딩 상태 변경
             }
-        };
+        }
 
-        fetchData();
-    }, []);
+        fetchData()
+    }, [])
 
     useEffect(() => {
         handleSettingData()
 
-        if(isInitialUpdate)
-        {
-
-            console.log(stageData, currentStageLevel,"11111")
-
-
-            if(currentStageLevel === 0){
-                setComponentToRender(()=>StartPage)
-            }else if(currentStageLevel === 1){
-                setComponentToRender(()=>ReferencePage)
-            }else if(currentStageLevel === 2){
-                setComponentToRender(()=>FirstWritingPage)
-            }else if(currentStageLevel === 3){
-                setComponentToRender(()=>GrammarCheckPage) 
-            }else if(currentStageLevel === 4){
-                setComponentToRender(()=>TeacherFeedbackPage)
-            }else if(currentStageLevel === 5){
-                setComponentToRender(()=>FinalSubmitPage)     
+        if (isInitialUpdate) {
+            if (currentStageLevel === 0) {
+                setComponentToRender(() => StartPage)
+            } else if (currentStageLevel === 1) {
+                setComponentToRender(() => ReferencePage)
+            } else if (currentStageLevel === 2) {
+                setComponentToRender(() => FirstWritingPage)
+            } else if (currentStageLevel === 3) {
+                setComponentToRender(() => GrammarCheckPage)
+            } else if (currentStageLevel === 4) {
+                setComponentToRender(() => TeacherFeedbackPage)
+            } else if (currentStageLevel === 5) {
+                setComponentToRender(() => FinalSubmitPage)
             }
         }
-        
 
     }, [currentStageLevel, isInitialUpdate])
 
     const checkGrammar = async (contentData) => {
         const result = await writingValidator(contentData)
-        setValidateResult(result)
+        validateResultRef.current = result
     }
 
     const handleCurrentStage = async (updateData) => {
-
         const updatingData = async (updateData) => {
-            if(currentStageLevel === 2){
-                setStudentContent(updateData.content)
-                setSubmitCnt(submitCnt + 1)
+            if(currentStageLevel === 1){
+                submitCntRef.current += 1
+            }
+            if (currentStageLevel === 2) {
+                studentContentRef.current = updateData.content
+                submitCntRef.current += 1
 
                 await checkGrammar(updateData.content)
             }
-            else if(currentStageLevel === 3 || currentStageLevel === 4){
-                setStudentContent(updateData.content)
-                setSubmitCnt(submitCnt + 1)
+            else if (currentStageLevel === 3) {
+
+                studentContentRef.current = updateData.content
+                submitCntRef.current += 1
             }
-            else if(currentStageLevel === 5){
-                setStudentContent(updateData.studentContent)
-                setSubmitCnt(submitCnt + 1)
+            else if( currentStageLevel === 4){
+                studentContentRef.current = updateData.content
+                submitCntRef.current += 1
+            }
+            else if (currentStageLevel === 5) {
+                studentContentRef.current = updateData.studentContent
+                submitCntRef.current += 1
             }
 
             setCurrentStageLevel(currentStageLevel + 1)
         }
 
+        console.log("update 됩니다!!")
+
         await updatingData(updateData)
-        
     };
 
-    const handleSettingData = async () => {
+    const handleSettingData = () => {
 
-        const setUpdatingData = async () => {
             let updateData = null
 
-            if (currentStageLevel === 0) { // 비교 연산자를 엄격하게 사용
+            if (currentStageLevel === 0) {
                 updateData = {
-                    curriculumId: curriculumId,
-                    lessonId: lessonId,
-                    allocatedDate: allocatedDate,
+                    curriculumId: curriculumIdRef.current,
+                    lessonId: lessonIdRef.current,
+                    allocatedDate: allocatedDateRef.current,
                 };
             }
-            else if(currentStageLevel === 1) {
+            else if (currentStageLevel === 1) {
                 updateData = {
-                    reference : reference
+                    reference: referenceRef.current
                 };
             }
-            else if(currentStageLevel === 2) {
+            else if (currentStageLevel === 2) {
                 updateData = {
-                    content :  studentContent,
-                    wordLimit : wordLimit,
-                    theme : theme,
-                    reference : reference,
+                    content: studentContentRef.current,
+                    wordLimit: wordLimitRef.current,
+                    theme: themeRef.current,
+                    reference: referenceRef.current,
                 };
             }
-            else if(currentStageLevel === 3) {
+            else if (currentStageLevel === 3) {
+
                 updateData = {
-                    studentContent: studentContent,
+                    studentContent: studentContentRef.current,
                     writingInfo: {
-                        theme: theme,
-                        wordLimit: wordLimit
+                        theme: themeRef.current,
+                        wordLimit: wordLimitRef.current
                     },
-                    grammarResult: validateResult
+                    grammarResult: validateResultRef.current
                 };
             }
-            else if(currentStageLevel === 4) {
+            else if (currentStageLevel === 4) {
                 updateData = {
-                    studentContent: studentContent,
+                    studentContent: studentContentRef.current,
                     writingInfo: {
-                        theme: theme,
-                        wordLimit: wordLimit
+                        theme: themeRef.current,
+                        wordLimit: wordLimitRef.current
                     }
                 };
             }
-            else if(currentStageLevel === 5) {
-    
+            else if (currentStageLevel === 5) {
                 updateData = {
-                    studentContent: studentContent,
+                    studentContent: studentContentRef.current,
                     writingInfo: {
-                        theme: theme,
-                        wordLimit: wordLimit
+                        theme: themeRef.current,
+                        wordLimit: wordLimitRef.current
                     }
                 }
             }
 
-            setStageData(updateData);
-        }
+            stageData.current = updateData
 
-        await setUpdatingData()
+
     }
 
-    // type, lesson num, date는 이전 페이지에서 불러옴.
+    const endWritingStudy = async () => {
+        const clickEndButton = window.confirm("학습을 종료하시겠습니까? \n\n현재 페이지에서 작성하신 내용은 사라집니다.\n\n학습을 다시 시작하실 때는 이전 단계부터 시작됩니다.")
+        
+        if(clickEndButton){
+
+            if(currentStageLevel !== 0){
+                submitCntRef.current = currentStageLevel - 1
+            }
+            await updateStudentContent("677fcc533e378bd9ea60afa1", studentContentRef.current, submitCntRef.current)
+            router.push('../../')
+        } else{
+        }
+    }
+
     return (
         <div>
-
-        {
+            <button onClick={endWritingStudy}>학습 종료</button>
+            {
                 ComponentToRender ? (
                     <ComponentToRender
-                    data = { stageData }
-                    onComplete={(updateData) => handleCurrentStage(updateData)}
+                        data={stageData.current}
+                        onComplete={(updateData) => handleCurrentStage(updateData)}
                     />
                 ) : (
                     <div>Loading...</div> // 로딩 상태 표시
                 )
-        }
-
-
-        {/* <div>
-            {studentContent}, {teacherFeedback},{allocatedDate},{submitCnt},{theme},{wordLimit},{reference}
-        </div> */}
+            }
         </div>
     )
 }

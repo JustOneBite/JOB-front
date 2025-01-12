@@ -49,6 +49,16 @@ export default function TeacherCheckSubmit({data, onComplete}) {
                 <p>남은 글자수 {data.writingInfo.wordLimit - countWords(writingText)}</p>
                 <button type="submit" disabled={countWords(writingText) === 0}>최종 제출</button> 
             </form>
+            <div>
+                <ol>
+                    <li>
+                        쌤 피드백1
+                    </li>
+                    <li>
+                        쌤 피드백2
+                    </li>
+                </ol>
+            </div>
             <div>{errorMessage}</div>
         </div>
     )

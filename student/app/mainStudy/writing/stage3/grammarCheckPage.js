@@ -90,10 +90,10 @@ export default function GrammerCheck({data, onComplete}) {
                     <span key={`error-${index}`} style={{ textDecoration: "underline", color: "red" }}>
                         {issue.context.text}
                     </span>
-                );
+                )
                 lastIndex = matchIndex + issue.context.text.length; // 마지막 인덱스 업데이트
             }
-        });
+        })
     
         // 마지막 부분 추가
         highlightedParts.push(text.slice(lastIndex))

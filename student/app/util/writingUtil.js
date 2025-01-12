@@ -31,7 +31,7 @@ export async function getWritingData(id) {
 }
 
 
-export async function updateStudentContent(id,studentContent){
+export async function updateStudentContent(id,studentContent, submitCnt){
     try{
         const response = await fetch('http://localhost:8080/studentLesson/updateStudentData', {
             method: "PATCH",
@@ -42,6 +42,7 @@ export async function updateStudentContent(id,studentContent){
                 id: id,
                 studentData: {
                         content: studentContent,
+                        submitCnt: submitCnt
                     }
             
             }),
