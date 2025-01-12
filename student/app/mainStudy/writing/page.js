@@ -8,6 +8,8 @@ import FirstWritingPage from "./stage2/firstWritingPage"
 import GrammarCheckPage from "./stage3/grammarCheckPage"
 import TeacherFeedbackPage from "./stage4/teacherFeedbackPage"
 import FinalSubmitPage from "./stage5/finalSubmitPage"
+import styles from './writing.module.css'
+
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"; // useRouter 가져오기 
 
@@ -37,6 +39,11 @@ export default function WritingController() {
     const [error, setError] = useState(null)
 
     const router = useRouter(); // useRouter 초기화
+
+
+    const [modalOpen, setModalOpen] = useState(false);
+    const modalBackground = useRef(); 
+
 
     useEffect(() => {
         const handleBeforeUnload = (event) => {
@@ -202,27 +209,40 @@ export default function WritingController() {
             }
 
             stageData.current = updateData
-
-
     }
 
     const endWritingStudy = async () => {
-        const clickEndButton = window.confirm("학습을 종료하시겠습니까? \n\n현재 페이지에서 작성하신 내용은 사라집니다.\n\n학습을 다시 시작하실 때는 이전 단계부터 시작됩니다.")
-        
-        if(clickEndButton){
+        // const clickEndButton = window.confirm("학습을 종료하시겠습니까? \n\n현재 페이지에서 작성하신 내용은 사라집니다.\n\n학습을 다시 시작하실 때는 이전 단계부터 시작됩니다.")
 
-            if(currentStageLevel !== 0){
-                submitCntRef.current = currentStageLevel - 1
-            }
-            await updateStudentContent("677fcc533e378bd9ea60afa1", studentContentRef.current, submitCntRef.current)
-            router.push('../../')
-        } else{
-        }
+        await updateStudentContent("677fcc533e378bd9ea60afa1", studentContentRef.current, submitCntRef.current)
+        router.push('/')
+        
     }
 
     return (
         <div>
-            <button onClick={endWritingStudy}>학습 종료</button>
+            <button onClick={() => setModalOpen(true)}>학습 종료</button>
+            <div>
+                {
+                    modalOpen && 
+
+                    <div className={styles.modalOverlay} ref={modalBackground} onClick={e => {
+                        if (e.target = modalBackground.current) {
+                            setModalOpen(false)
+                        }
+                    }}> 
+                        <div className={styles.modalContainer}>
+                            <h2 className={styles.modalTitle} >학습을 종료하시겠습니까?</h2>
+                            <p className={styles.modalDescription} >종료하시면 이전 단계까지 저장됩니다.</p>
+                            <div className={styles.buttonGroup}>
+                            <button className={styles.buttonConfirm} onClick={() => setModalOpen(false)}>계속 학습하기</button> 
+                            <button className={styles.buttonCancel} onClick={endWritingStudy}>종료하기</button>
+                            </div>
+                        </div>
+                        
+                    </div>
+                }
+            </div>
             {
                 ComponentToRender ? (
                     <ComponentToRender
