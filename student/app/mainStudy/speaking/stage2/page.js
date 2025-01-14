@@ -4,19 +4,37 @@
 import { useEffect, useState, useRef } from "react";
 import styles from './page.module.css'; // CSS 모듈 임포트
 
-export default function SpeakingLesson() {
+export default function SpeakingLesson({data, onComplete}) {
   const [isRecording, setIsRecording] = useState(false); // 녹음 상태를 관리하는 변수
   const [transcript, setTranscript] = useState(""); // 녹음된 발음을 텍스트화 시킨 변수
   const [audioURL, setAudioURL] = useState(null); // 오디오 URL을 저장할 변수
-  const [problemIndex, setProblemIndex] = useState(1); // 문제 번호 변수
+  const [problemIndex, setProblemIndex] = useState(0); // 문제 번호 변수
   const [isPlaying, setIsPlaying] = useState(false); // 오디오 재생 상태를 관리하는 변수
-  const [text, setText] = useState('In the beginning, God said, let there be light'); //읽을 문장을 관리하는 변수
+  const [texts, setTexts] = useState([]); //읽을 문장을 관리하는 변수
+  const [score, setScore] = useState(0)
+  const [errorMessage, setErrorMessage] = useState('')
 
   // Reference to store the SpeechRecognition instance
   const recognitionRef = useRef(null); // 녹음이 되고 있는지를 저장할 변수
   const mediaRecorderRef = useRef(null); // MediaRecorder 인스턴스를 저장할 변수
   const audioChunksRef = useRef([]); // 오디오 청크들을 저장할 변수
   const audioRef = useRef(null); // 오디오 요소 참조
+  const apiMainPathSTS = 'http://127.0.0.1:3001';
+
+  // 페이지 전환을 하거나 컴포넌트가 언마운트 되면 음성인식, 미디어 녹음을 중지
+  useEffect(() => {
+    
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    // 2. 미디어 녹음(MediaRecorder)이 활성화 상태이면 중지
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+
+    setTexts(data)
+    
+  }, []);
 
 
   // 녹음 시작 함수
@@ -36,11 +54,48 @@ export default function SpeakingLesson() {
           audioChunksRef.current.push(event.data);
         };
 
-        mediaRecorderRef.current.onstop = () => {
+        mediaRecorderRef.current.onstop = async() => {
           // 녹음이 종료되면 새로운 오디오 데이터 URL을 생성
           const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
           const audioUrl = URL.createObjectURL(audioBlob);
           setAudioURL(audioUrl); // 오디오 URL을 최신화
+
+          //평가 진행 및 정확도 갱신
+
+          try
+          {
+            let audioBase64 = await convertBlobToBase64(audioBlob);
+
+            let minimumAllowedLength = 6;
+
+            if (audioBase64.length < minimumAllowedLength) {
+                setErrorMessage("너무 짧습니다. 다시 녹음해주세요.")
+                return
+            }
+
+            const response = await fetch(apiMainPathSTS + '/GetAccuracyFromRecordedAudio', {
+                method: "post",
+                body: JSON.stringify({ "title": texts[problemIndex], "base64Audio": audioBase64, "language": "en" }),
+                // headers: { "X-Api-Key": STScoreAPIKey }
+            })
+            
+            if(!response.ok)
+            {
+                alert('Accuracy Estimation Fail')
+                throw new Error('정확도 평가 실패')
+            }
+
+            const result = await response.json()
+            
+            const accuracyScore = parseFloat(result.pronunciation_accuracy)
+
+            setScore(accuracyScore)
+
+          }
+          catch(e){
+            setErrorMessage(e)
+          }
+    
           audioChunksRef.current = []; // 다음 녹음을 위해 오디오 청크 초기화
         };
 
@@ -66,19 +121,6 @@ export default function SpeakingLesson() {
     recognitionRef.current.start();
   };
 
-  // 페이지 전환을 하거나 컴포넌트가 언마운트 되면 음성인식, 미디어 녹음을 중지
-  useEffect(() => {
-    return () => {
-      // 음성 인식(Recognition)이 활성화되어 있으면 중지
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-       // 2. 미디어 녹음(MediaRecorder)이 활성화 상태이면 중지
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
-        mediaRecorderRef.current.stop();
-      }
-    };
-  }, []);  // 빈 배열을 전달하여, 컴포넌트가 마운트될 때 한 번만 실행되고, 언마운트 시 실행되도록 함
 
   // 녹음 정지 함수
   const stopRecording = () => {
@@ -118,7 +160,7 @@ export default function SpeakingLesson() {
   // 음원 읽어주는 함수
   const speakText = () => {
     if (window.speechSynthesis) {
-      const utterance = new SpeechSynthesisUtterance(text);
+      const utterance = new SpeechSynthesisUtterance(texts[problemIndex]);
       utterance.rate = 0.8;  // 음성 속도
       utterance.pitch = 1; // 음성 피치
       utterance.lang = "en-US"; // 음성 언어 설정
@@ -143,9 +185,9 @@ export default function SpeakingLesson() {
             <p className={styles.lesson}>교재이름 - Unit 7</p>
           </div>
           <div className={styles.progressContainer}>
-            <div className={styles.progressBar} style={{ '--ratio': problemIndex }}></div>
+            <div className={styles.progressBar} style={{ '--ratio': problemIndex+1 }}></div>
             <div className={styles.progressInfo}>
-              {problemIndex} / 30
+              {problemIndex + 1} / 30
             </div>
           </div>
         </header>
@@ -156,7 +198,7 @@ export default function SpeakingLesson() {
         <main className={styles.main}>
           
           <div className={styles.sentenceBox}>
-            <p className={styles.sentence}>{text}</p>
+            <p className={styles.sentence}>{texts[problemIndex]}</p>
             <div className={styles.voiceButtons}>
               <button className={styles.autoVoice} onClick={speakText}>
                 <div className={styles.autoElements}>
@@ -239,6 +281,16 @@ export default function SpeakingLesson() {
   );
 }
 
+const convertBlobToBase64 = async (blob) => {
+  return await blobToBase64(blob);
+}
+
+const blobToBase64 = blob => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.readAsDataURL(blob);
+  reader.onload = () => resolve(reader.result);
+  reader.onerror = error => reject(error);
+});
 
 // {/* 오디오 재생 버튼 */}
 // {/* 최신 오디오 파일을 렌더링하며, 가장 최근 녹음만 표시하도록 함. 녹음된 오디오 다운로드 기능 삭제*/}
