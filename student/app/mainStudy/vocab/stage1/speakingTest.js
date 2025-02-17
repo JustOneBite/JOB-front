@@ -9,9 +9,9 @@ export default function SpeakingTest({ vocabs, onTestComplete }) {
         Array(vocabs.length).fill(false) // 초기값 false로 배열 생성
     );
 
-    const [passedVocabCount, setPassedVocabCount] = useState(0); 
+    const [passedVocabCount, setPassedVocabCount] = useState(0);
     const initialArray = [null, null, null];
-    const [testResult, setTestResult] = useState(initialArray); 
+    const [testResult, setTestResult] = useState(initialArray);
     const [testTry, setTestTry] = useState(0);// 몇 번째 시도인지 확인하기 위한 변수
 
     const [shouldReset, setShouldReset] = useState(false);
@@ -210,26 +210,26 @@ export default function SpeakingTest({ vocabs, onTestComplete }) {
                 </div>
 
                 {/* 단어 맞았을 때 팝업 */}
-                {passResults[currentIndex] ? (
-                    <div>
-                        <VocabCorrectPopup />
-                        <div style={{display:"none"}}>
-                            {setTimeout(() => handlePass(undefined), 3000)}
+                {recordedAudio !== null && (!passResults[currentIndex] ? console.log("아직 틀림") : (
+                    (passResults.every((isPassed) => isPassed)) ? <NextStagePopup handlesubmit={handleSubmit}/> : (
+                        <div>
+                            <VocabCorrectPopup />
+                            <div style={{ display: "none" }}>
+                                {setTimeout(() => handlePass(undefined), 500)}
+                            </div>
                         </div>
-                    </div>
-                ) : console.log("아직 틀렸다")}
+                    )
+                ))}
 
                 {/* 단어 틀렸을 때 팝업 */}
-                {testTry == 3 ? (
+                {recordedAudio !== null && (testTry == 3 ? (
                     <div>
                         <VocabNoChancePopup />
-                        <div style={{display:"none"}}>
+                        <div style={{ display: "none" }}>
                             {setTimeout(() => handlePass(undefined), 3000)}
                         </div>
-                        
                     </div>
-                ) : console.log("이걸 다 틀리네 ㅋㅋ")
-                }
+                ) : console.log("이걸 다 틀리네 ㅋㅋ"))}
 
                 {/* 학습하러가기 팝업 */}
                 {isToStudy &&
@@ -531,6 +531,36 @@ function VocabNoChancePopup() {
                             </svg>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function NextStagePopup(handlesubmit) {
+    return (
+        <div className={styles.popupContainer}>
+            <div className={styles.card}>
+                <div className={styles.content}>
+                    <div className={styles.header}>
+                        <h1 className={styles.title}>Vocabulary 테스트 완료</h1>
+                        <div className={styles.stats}>
+                            <div className={styles.statText}>맞은 문제 수: 15개</div>
+                            <div className={styles.wrongText}>틀린 문제 수: 15개</div>
+                        </div>
+                    </div>
+
+                    <div className={styles.checkmarkContainer}>
+                        <div className={styles.checkmarkCircle}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+                                <path d="M25.4658 40.4L48.0658 17.8C48.5992 17.2667 49.2214 17 49.9325 17C50.6436 17 51.2658 17.2667 51.7992 17.8C52.3325 18.3333 52.5992 18.9671 52.5992 19.7013C52.5992 20.4356 52.3325 21.0684 51.7992 21.6L27.3325 46.1333C26.7992 46.6667 26.177 46.9333 25.4658 46.9333C24.7547 46.9333 24.1325 46.6667 23.5992 46.1333L12.1325 34.6667C11.5992 34.1333 11.3432 33.5004 11.3645 32.768C11.3858 32.0356 11.6641 31.4018 12.1992 30.8667C12.7343 30.3316 13.3681 30.0649 14.1005 30.0667C14.833 30.0684 15.4658 30.3351 15.9992 30.8667L25.4658 40.4Z" fill="#0084D0" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <button className={styles.button} onClick={handlesubmit}>
+                        다음 스테이지로
+                    </button>
                 </div>
             </div>
         </div>
